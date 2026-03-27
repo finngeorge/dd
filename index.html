@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>DD — Due Diligence Dashboard</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<script src="data.js"></script>
 <style>
 :root {
   --bg: #0a0b0f;
@@ -138,6 +139,7 @@ footer { text-align:center; padding:32px 24px; color:var(--muted); font-size:12p
     <a href="#shorts">Shorts</a>
     <a href="#themes">Themes</a>
     <a href="#watchlist">Watchlist</a>
+    <a href="portfolio.html">Portfolio Simulator</a>
   </div>
 </nav>
 
@@ -341,7 +343,7 @@ const longs = [
     thesis:'Forward P/E of 4.4x with 196% revenue growth and 81% guided gross margins. HBM sold out through 2027. The most mispriced large-cap in the market. Current selloff is a gift.',
     risks:'Memory cyclicality, post-2027 capacity expansion, tariff exposure on modules',
     tags:['AI Memory','HBM','DRAM','Semiconductors'],
-    sector:'Semiconductors', link:'mu.html'
+    sector:'Semiconductors', link:'stock.html?t=MU'
   },
   {
     ticker:'AVGO', company:'Broadcom Inc', price:207, fwdPE:23.2, revGrowth:29, epsGrowth:40,
@@ -349,7 +351,7 @@ const longs = [
     thesis:'Second biggest AI winner after NVIDIA. Custom XPUs for Google, Meta, Apple. $73B AI backlog over 18 months. 68% EBITDA margins. VMware acquisition driving software margin expansion.',
     risks:'Customer concentration in top 3 hyperscalers, custom silicon competition',
     tags:['AI Custom Silicon','Networking','Software'],
-    sector:'Semiconductors', link:null
+    sector:'Semiconductors', link:'stock.html?t=AVGO'
   },
   {
     ticker:'LULU', company:'Lululemon Athletica', price:157, fwdPE:13, revGrowth:8, epsGrowth:12,
@@ -357,7 +359,7 @@ const longs = [
     thesis:'Down 54% from highs — cheapest valuation in a decade at 12x trailing earnings. China growing 46% YoY. 55%+ gross margins. $1M insider purchase by board member. Classic contrarian deep value.',
     risks:'U.S. same-store deceleration, tariff headwinds, brand fatigue concerns',
     tags:['Contrarian','Deep Value','Consumer','China Growth'],
-    sector:'Consumer', link:null
+    sector:'Consumer', link:'stock.html?t=LULU'
   },
   {
     ticker:'CEG', company:'Constellation Energy', price:303, fwdPE:27, revGrowth:11, epsGrowth:22.5,
@@ -365,7 +367,7 @@ const longs = [
     thesis:'Largest U.S. nuclear fleet. 20-year PPAs with Microsoft (TMI restart) and Meta (1.1 GW). Calpine acquisition gives 60 GW capacity. Down 27% from $412 high. Monopoly on AI power.',
     risks:'Regulatory risk on nuclear restarts, Calpine integration, TMI restart capital costs ($1.6B)',
     tags:['Nuclear','AI Power','Clean Energy','Data Centers'],
-    sector:'Energy', link:null
+    sector:'Energy', link:'stock.html?t=CEG'
   },
   {
     ticker:'LLY', company:'Eli Lilly', price:898, fwdPE:40, revGrowth:18.4, epsGrowth:30,
@@ -373,7 +375,7 @@ const longs = [
     thesis:'Co-leader of $100B GLP-1 obesity market. Tirzepatide growing 115% YoY. Oral formulation (orforglipron) filing in 2026 massively expands TAM. Medicare coverage starting mid-2026.',
     risks:'Premium valuation, GLP-1 competition (Novo, Viking), manufacturing scale-up',
     tags:['GLP-1','Obesity','Pharma','Secular Growth'],
-    sector:'Healthcare', link:null
+    sector:'Healthcare', link:'stock.html?t=LLY'
   },
   {
     ticker:'ANET', company:'Arista Networks', price:123, fwdPE:25, revGrowth:25, epsGrowth:28,
@@ -381,7 +383,7 @@ const longs = [
     thesis:'Dominant Ethernet networking for AI clusters. AI revenue guidance raised to $3.25B (+100% YoY). Zero debt. 40% operating margins. 53% upside to high analyst targets.',
     risks:'NVIDIA InfiniBand competition, hyperscaler spending slowdown',
     tags:['AI Networking','Data Centers','Ethernet'],
-    sector:'Semiconductors', link:null
+    sector:'Semiconductors', link:'stock.html?t=ANET'
   },
   {
     ticker:'CCJ', company:'Cameco Corp', price:105, fwdPE:35, revGrowth:11, epsGrowth:243,
@@ -389,7 +391,7 @@ const longs = [
     thesis:'World\'s #2 uranium producer. Structural uranium supply deficit. 49% Westinghouse ownership = full nuclear fuel cycle exposure. Long-term uranium at 14-year high of $86.50/lb.',
     risks:'Uranium price volatility, Kazakhstan production ramp, SMR regulatory delays',
     tags:['Uranium','Nuclear','Commodity','Supply Deficit'],
-    sector:'Energy', link:null
+    sector:'Energy', link:'stock.html?t=CCJ'
   },
   {
     ticker:'VRT', company:'Vertiv Holdings', price:276, fwdPE:42.5, revGrowth:30, epsGrowth:47,
@@ -397,7 +399,7 @@ const longs = [
     thesis:'Leading data center cooling and power systems provider. Liquid cooling mandatory as GPU power density surges. $15B backlog. 30%+ revenue growth with 47% earnings growth.',
     risks:'Premium valuation at 42x, competition from Schneider/Eaton, capex slowdown risk',
     tags:['Data Center Cooling','Power','AI Infrastructure'],
-    sector:'Industrials', link:null
+    sector:'Industrials', link:'stock.html?t=VRT'
   },
   {
     ticker:'GD', company:'General Dynamics', price:365, fwdPE:21.2, revGrowth:3.7, epsGrowth:8,
@@ -405,7 +407,7 @@ const longs = [
     thesis:'$118B defense backlog — largest in history. One of two companies that can build nuclear submarines. $1.5T defense budget era. Gulfstream provides commercial diversification.',
     risks:'Sequestration risk, supply chain labor shortages, Gulfstream cyclicality',
     tags:['Defense','Submarines','Aerospace'],
-    sector:'Defense', link:null
+    sector:'Defense', link:'stock.html?t=GD'
   },
   {
     ticker:'RTX', company:'RTX Corporation', price:192, fwdPE:29, revGrowth:12.1, epsGrowth:15,
@@ -413,7 +415,7 @@ const longs = [
     thesis:'Broadest defense portfolio: missiles (Patriot), engines (F-135), radar, cyber. Beat on revenue and EPS last quarter. Rising Middle East tensions and European rearmament driving demand.',
     risks:'Pratt & Whitney engine recall costs, international sales regulatory hurdles',
     tags:['Defense','Missiles','Engines','Radar'],
-    sector:'Defense', link:null
+    sector:'Defense', link:'stock.html?t=RTX'
   },
   {
     ticker:'CRWD', company:'CrowdStrike', price:393, fwdPE:75, revGrowth:22, epsGrowth:25,
@@ -421,7 +423,7 @@ const longs = [
     thesis:'Dominant cloud-native cybersecurity platform. $5.25B ARR growing 24%. Fully recovered from July 2024 outage. IBM partnership + Charlotte AI strengthen moat. Pulled back with market.',
     risks:'Premium valuation, security spending rationalization, Microsoft competition',
     tags:['Cybersecurity','AI Security','SaaS'],
-    sector:'Technology', link:null
+    sector:'Technology', link:'stock.html?t=CRWD'
   },
   {
     ticker:'PWR', company:'Quanta Services', price:578, fwdPE:44, revGrowth:15, epsGrowth:18,
@@ -429,7 +431,7 @@ const longs = [
     thesis:'Largest electrical infrastructure contractor in North America. $44B backlog (+27.5%). Turnkey solutions for hyperscaler data center construction. Picks-and-shovels AI power play.',
     risks:'Labor cost inflation, project execution risk, interest rate sensitivity',
     tags:['Infrastructure','Data Centers','Grid','Construction'],
-    sector:'Industrials', link:null
+    sector:'Industrials', link:'stock.html?t=PWR'
   }
 ];
 
@@ -440,7 +442,7 @@ const shorts = [
     thesis:'185x forward P/E with declining EV sales and compressing margins. CEO distraction with government role. Robotaxi timeline repeatedly pushed. China competition intensifying from BYD.',
     risks:'Cult stock, Elon optionality, FSD/robotaxi breakthrough, energy storage growth',
     tags:['Overvalued','EV Decline','CEO Risk','Margin Compression'],
-    sector:'Automotive'
+    sector:'Automotive', link:'stock.html?t=TSLA'
   },
   {
     ticker:'PLTR', company:'Palantir Technologies', price:107, fwdPE:117, revGrowth:22, epsGrowth:20,
@@ -448,7 +450,7 @@ const shorts = [
     thesis:'117x forward P/E for 22% revenue growth — PEG of 5.3x. Valuation prices in perfection for a decade. Government contract concentration. Revenue growth decelerating. Stock up 300%+ on AI hype alone.',
     risks:'AI narrative strength, government spending tailwinds, platform stickiness',
     tags:['Overvalued','AI Hype','Gov Concentration'],
-    sector:'Technology'
+    sector:'Technology', link:'stock.html?t=PLTR'
   },
   {
     ticker:'SNOW', company:'Snowflake', price:185, fwdPE:null, revGrowth:25, epsGrowth:null,
@@ -456,7 +458,7 @@ const shorts = [
     thesis:'Still unprofitable at ~$3.5B revenue. 25x EV/Revenue for decelerating growth. Net revenue retention declining. Competition from Databricks intensifying. CEO transition risk.',
     risks:'Product quality, AI data workload growth, M&A target',
     tags:['Unprofitable','Decelerating Growth','Competition'],
-    sector:'Technology'
+    sector:'Technology', link:'stock.html?t=SNOW'
   },
   {
     ticker:'RIVN', company:'Rivian Automotive', price:14, fwdPE:null, revGrowth:15, epsGrowth:null,
@@ -464,7 +466,7 @@ const shorts = [
     thesis:'Burning cash at unsustainable rates. Negative gross margins. VW partnership provides lifeline but valuation still assumes profitability years away. Tariff exposure on components.',
     risks:'VW partnership, R2 launch potential, EV policy tailwinds',
     tags:['Cash Burn','Negative Margins','EV'],
-    sector:'Automotive'
+    sector:'Automotive', link:'stock.html?t=RIVN'
   },
   {
     ticker:'ABNB', company:'Airbnb', price:128, fwdPE:32, revGrowth:10, epsGrowth:8,
@@ -472,7 +474,7 @@ const shorts = [
     thesis:'Growth decelerating to single digits while trading at 32x forward earnings. Regulatory headwinds mounting globally (NYC, Barcelona, EU). Supply growth outpacing demand growth. Margin pressure.',
     risks:'Brand strength, new product categories (experiences, luxury), housing shortage tailwind',
     tags:['Decelerating','Regulatory Risk','Valuation'],
-    sector:'Consumer'
+    sector:'Consumer', link:'stock.html?t=ABNB'
   }
 ];
 
@@ -504,7 +506,7 @@ document.getElementById('longGrid').innerHTML = longs.map(s => renderCard(s, fal
 document.getElementById('shortGrid').innerHTML = shorts.map(s => renderCard(s, true)).join('');
 
 // ── WATCHLIST TABLE ──
-const allStocks = [...longs.map(s => ({...s, side:'Long'})), ...shorts.map(s => ({...s, side:'Short'}))];
+const allStocks = [...longs.map(s => ({...s, side:'Long', link: s.link || 'stock.html?t='+s.ticker})), ...shorts.map(s => ({...s, side:'Short', link: s.link || 'stock.html?t='+s.ticker}))];
 function renderWatchlist(data) {
   document.getElementById('watchlistBody').innerHTML = data.map(s => {
     const upside = ((s.target - s.price) / s.price * 100);

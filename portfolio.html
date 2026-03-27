@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DD — Portfolio Simulator</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<script src="data.js"></script>
+<style>
+:root{--bg:#0a0b0f;--bg2:#0f1117;--card:#161820;--card-hover:#1c1f2b;--border:#23263a;--text:#e1e4eb;--muted:#7a7f96;--green:#22c55e;--red:#ef4444;--blue:#3b82f6;--purple:#a855f7;--orange:#f59e0b;--cyan:#06b6d4;--accent:#6366f1;--pink:#ec4899}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,'SF Pro Display','Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);line-height:1.5}
+nav{background:var(--bg2);border-bottom:1px solid var(--border);padding:0 32px;display:flex;align-items:center;justify-content:space-between;height:56px;position:sticky;top:0;z-index:100;backdrop-filter:blur(12px)}
+nav .logo{font-size:20px;font-weight:800;text-decoration:none;color:var(--text)}
+nav .logo span{color:var(--accent)}
+nav .nav-links{display:flex;gap:8px}
+nav .nav-links a{color:var(--muted);text-decoration:none;font-size:13px;font-weight:500;padding:8px 14px;border-radius:8px;transition:.15s}
+nav .nav-links a:hover,nav .nav-links a.active{color:var(--text);background:rgba(99,102,241,.1)}
+.container{max-width:1480px;margin:0 auto;padding:24px 24px 80px}
+.hero{padding:32px 0 24px}
+.hero h1{font-size:32px;font-weight:800;letter-spacing:-1px;margin-bottom:6px}
+.hero h1 span{background:linear-gradient(135deg,var(--accent),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero p{color:var(--muted);font-size:14px}
+
+/* Controls */
+.controls{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:24px;margin-bottom:24px}
+.controls h2{font-size:16px;font-weight:600;margin-bottom:16px}
+.ctrl-row{display:flex;align-items:center;gap:16px;margin-bottom:16px;flex-wrap:wrap}
+.ctrl-row label{font-size:13px;color:var(--muted);min-width:100px}
+.scenario-btns{display:flex;gap:6px}
+.scenario-btns button{padding:8px 18px;border:1px solid var(--border);border-radius:8px;background:var(--bg2);color:var(--muted);cursor:pointer;font-size:13px;font-weight:500;transition:.15s}
+.scenario-btns button:hover{border-color:var(--accent);color:var(--text)}
+.scenario-btns button.active{background:var(--accent);border-color:var(--accent);color:white}
+.total-input{display:flex;align-items:center;gap:8px}
+.total-input input{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--text);font-size:16px;font-weight:600;width:180px;outline:none;transition:.2s}
+.total-input input:focus{border-color:var(--accent)}
+.total-input span{font-size:14px;color:var(--muted)}
+
+/* Allocation Grid */
+.alloc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px;margin-bottom:24px}
+.alloc-item{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px;transition:.2s}
+.alloc-item:hover{border-color:var(--accent)}
+.alloc-item.disabled{opacity:.4}
+.alloc-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.alloc-header .ticker{font-size:16px;font-weight:800}
+.alloc-header .side{font-size:10px;padding:2px 8px;border-radius:4px;font-weight:600}
+.side-long{background:rgba(34,197,94,.15);color:var(--green)}
+.side-short{background:rgba(239,68,68,.15);color:var(--red)}
+.alloc-header .toggle{width:36px;height:20px;border-radius:10px;border:none;cursor:pointer;position:relative;transition:.2s}
+.alloc-header .toggle.on{background:var(--accent)}
+.alloc-header .toggle.off{background:var(--border)}
+.alloc-header .toggle::after{content:'';position:absolute;width:16px;height:16px;border-radius:50%;background:white;top:2px;transition:.2s}
+.alloc-header .toggle.on::after{left:18px}
+.alloc-header .toggle.off::after{left:2px}
+.alloc-body .amt-row{display:flex;align-items:center;gap:8px}
+.alloc-body input[type=number]{background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:6px 10px;color:var(--text);font-size:14px;width:100%;outline:none}
+.alloc-body input[type=number]:focus{border-color:var(--accent)}
+.alloc-meta{display:flex;justify-content:space-between;margin-top:8px;font-size:11px;color:var(--muted)}
+.alloc-meta .shares{color:var(--text);font-weight:600}
+
+/* Summary */
+.summary-row{display:grid;grid-template-columns:repeat(5,1fr);gap:16px;margin-bottom:24px}
+.summary-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px;text-align:center}
+.summary-card .s-label{font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin-bottom:4px}
+.summary-card .s-val{font-size:24px;font-weight:700}
+.summary-card .s-sub{font-size:12px;color:var(--muted);margin-top:4px}
+
+/* Charts */
+.chart-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}
+.chart-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px}
+.chart-card h3{font-size:14px;font-weight:600;margin-bottom:14px}
+.chart-wrap{position:relative;height:350px}
+.chart-wrap.tall{height:450px}
+
+/* Returns Table */
+.returns-table{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:20px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{background:var(--bg2);padding:10px 14px;text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);font-weight:600}
+td{padding:10px 14px;border-bottom:1px solid var(--border)}
+td.num{text-align:right;font-variant-numeric:tabular-nums;font-weight:500}
+th.num{text-align:right}
+.up{color:var(--green)}.down{color:var(--red)}
+
+footer{text-align:center;padding:32px;color:var(--muted);font-size:12px;border-top:1px solid var(--border);margin-top:40px}
+@media(max-width:768px){.alloc-grid{grid-template-columns:1fr}.chart-row{grid-template-columns:1fr}.summary-row{grid-template-columns:repeat(3,1fr)}}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="logo"><span>DD</span> Dashboard</a>
+  <div class="nav-links">
+    <a href="index.html">Overview</a>
+    <a href="portfolio.html" class="active">Portfolio Simulator</a>
+  </div>
+</nav>
+
+<div class="container">
+<div class="hero">
+  <h1>Portfolio <span>Simulator</span></h1>
+  <p>Allocate investment across positions and project returns over 1-5 years under bear, base, and bull scenarios.</p>
+</div>
+
+<!-- CONTROLS -->
+<div class="controls">
+  <div class="ctrl-row">
+    <label>Total Investment:</label>
+    <div class="total-input">
+      <span>$</span>
+      <input type="number" id="totalInvestment" value="100000" min="1000" step="1000">
+    </div>
+  </div>
+  <div class="ctrl-row">
+    <label>Scenario:</label>
+    <div class="scenario-btns" id="scenarioBtns">
+      <button data-s="bear">Bear</button>
+      <button data-s="base" class="active">Base</button>
+      <button data-s="bull">Bull</button>
+    </div>
+  </div>
+  <div class="ctrl-row">
+    <label>Horizon:</label>
+    <div class="scenario-btns" id="horizonBtns">
+      <button data-h="1">1 Year</button>
+      <button data-h="2">2 Years</button>
+      <button data-h="3" class="active">3 Years</button>
+      <button data-h="5">5 Years</button>
+    </div>
+  </div>
+</div>
+
+<!-- ALLOCATION GRID -->
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+  <h2 style="font-size:18px;font-weight:700">Position Allocation</h2>
+  <div style="display:flex;gap:8px">
+    <button onclick="distributeEqual()" style="padding:6px 14px;border:1px solid var(--border);border-radius:6px;background:var(--bg2);color:var(--muted);cursor:pointer;font-size:12px">Equal Weight</button>
+    <button onclick="distributeConviction()" style="padding:6px 14px;border:1px solid var(--border);border-radius:6px;background:var(--bg2);color:var(--muted);cursor:pointer;font-size:12px">Conviction-Weighted</button>
+    <button onclick="clearAll()" style="padding:6px 14px;border:1px solid var(--border);border-radius:6px;background:var(--bg2);color:var(--muted);cursor:pointer;font-size:12px">Clear All</button>
+  </div>
+</div>
+<div class="alloc-grid" id="allocGrid"></div>
+
+<!-- SUMMARY -->
+<div class="summary-row" id="summaryRow"></div>
+
+<!-- CHARTS -->
+<div class="chart-row">
+  <div class="chart-card">
+    <h3>Portfolio Value Over Time</h3>
+    <div class="chart-wrap tall"><canvas id="projChart"></canvas></div>
+  </div>
+  <div class="chart-card">
+    <h3>Allocation Breakdown</h3>
+    <div class="chart-wrap tall"><canvas id="allocChart"></canvas></div>
+  </div>
+</div>
+
+<div class="chart-row">
+  <div class="chart-card">
+    <h3>Individual Position Returns</h3>
+    <div class="chart-wrap tall"><canvas id="posReturnChart"></canvas></div>
+  </div>
+  <div class="chart-card">
+    <h3>Risk-Adjusted Returns (Sharpe Proxy)</h3>
+    <div class="chart-wrap tall"><canvas id="sharpeChart"></canvas></div>
+  </div>
+</div>
+
+<!-- RETURNS TABLE -->
+<div class="returns-table">
+  <table>
+    <thead>
+      <tr><th>Position</th><th>Side</th><th class="num">Invested</th><th class="num">Shares</th><th class="num">Year 1</th><th class="num">Year 2</th><th class="num">Year 3</th><th class="num">Year 5</th><th class="num">Total Return</th></tr>
+    </thead>
+    <tbody id="returnsBody"></tbody>
+    <tfoot id="returnsFoot"></tfoot>
+  </table>
+</div>
+</div>
+
+<footer>DD Dashboard — Portfolio Simulator. For informational and educational purposes only. Not financial advice. Projections are hypothetical based on growth models.</footer>
+
+<script>
+const CC = {green:'#22c55e',red:'#ef4444',blue:'#3b82f6',purple:'#a855f7',orange:'#f59e0b',cyan:'#06b6d4',accent:'#6366f1',pink:'#ec4899',muted:'#7a7f96',text:'#e1e4eb',grid:'rgba(35,38,58,.6)'};
+const COLORS = [CC.accent,CC.green,CC.blue,CC.purple,CC.orange,CC.cyan,CC.pink,CC.red,'#14b8a6','#8b5cf6','#f43f5e','#84cc16','#0ea5e9','#d946ef','#fb923c','#fbbf24','#a3e635'];
+
+let scenario = 'base';
+let horizon = 3;
+let allocations = {};
+let enabled = {};
+
+// Initialize
+const tickers = Object.keys(STOCKS);
+tickers.forEach(t => {
+  allocations[t] = 0;
+  enabled[t] = STOCKS[t].conviction >= 7;
+});
+
+// Render allocation grid
+function renderAllocGrid() {
+  const grid = document.getElementById('allocGrid');
+  grid.innerHTML = tickers.map((t, i) => {
+    const S = STOCKS[t];
+    const on = enabled[t];
+    const shares = allocations[t] > 0 ? (allocations[t] / S.price).toFixed(1) : '0';
+    return `<div class="alloc-item ${on ? '' : 'disabled'}" id="alloc-${t}">
+      <div class="alloc-header">
+        <div>
+          <span class="ticker" style="color:${COLORS[i%COLORS.length]}">${t}</span>
+          <span class="side ${S.side==='Long'?'side-long':'side-short'}">${S.side}</span>
+        </div>
+        <button class="toggle ${on?'on':'off'}" onclick="toggleStock('${t}')"></button>
+      </div>
+      <div class="alloc-body">
+        <div class="amt-row">
+          <span style="color:var(--muted);font-size:14px">$</span>
+          <input type="number" id="input-${t}" value="${allocations[t]}" min="0" step="500" onchange="updateAlloc('${t}',this.value)" ${on?'':'disabled'}>
+        </div>
+        <div class="alloc-meta">
+          <span>${S.company.split(' ').slice(0,2).join(' ')}</span>
+          <span class="shares">${shares} shares @ $${S.price}</span>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleStock(t) {
+  enabled[t] = !enabled[t];
+  if (!enabled[t]) allocations[t] = 0;
+  renderAllocGrid();
+  recalculate();
+}
+
+function updateAlloc(t, val) {
+  allocations[t] = Math.max(0, parseFloat(val) || 0);
+  recalculate();
+}
+
+function getTotal() { return parseFloat(document.getElementById('totalInvestment').value) || 100000; }
+
+function distributeEqual() {
+  const total = getTotal();
+  const active = tickers.filter(t => enabled[t]);
+  const each = Math.floor(total / active.length);
+  tickers.forEach(t => allocations[t] = enabled[t] ? each : 0);
+  renderAllocGrid();
+  recalculate();
+}
+
+function distributeConviction() {
+  const total = getTotal();
+  const active = tickers.filter(t => enabled[t]);
+  const totalConv = active.reduce((s, t) => s + STOCKS[t].conviction, 0);
+  tickers.forEach(t => {
+    allocations[t] = enabled[t] ? Math.floor(total * STOCKS[t].conviction / totalConv) : 0;
+  });
+  renderAllocGrid();
+  recalculate();
+}
+
+function clearAll() {
+  tickers.forEach(t => allocations[t] = 0);
+  renderAllocGrid();
+  recalculate();
+}
+
+// Project returns
+function projectPosition(ticker, amount, sc, years) {
+  if (amount <= 0 || !GROWTH_MODELS[ticker]) return Array(years).fill(amount);
+  const rates = GROWTH_MODELS[ticker][sc];
+  const isShort = STOCKS[ticker].side === 'Short';
+  let val = amount;
+  const values = [];
+  for (let y = 0; y < years; y++) {
+    const r = (rates[y] || rates[rates.length-1]) / 100;
+    if (isShort) {
+      val = val * (1 - r); // short profits when stock goes down (negative rates = profit)
+    } else {
+      val = val * (1 + r);
+    }
+    values.push(val);
+  }
+  return values;
+}
+
+let projChartInst, allocChartInst, posReturnInst, sharpeInst;
+
+function recalculate() {
+  const total = getTotal();
+  const invested = tickers.reduce((s, t) => s + allocations[t], 0);
+  const active = tickers.filter(t => allocations[t] > 0);
+
+  // Project each position
+  const maxYears = 5;
+  const projections = {};
+  active.forEach(t => {
+    projections[t] = projectPosition(t, allocations[t], scenario, maxYears);
+  });
+
+  // Portfolio totals per year
+  const portfolioByYear = [];
+  for (let y = 0; y < maxYears; y++) {
+    let total = 0;
+    active.forEach(t => { total += projections[t][y]; });
+    portfolioByYear.push(total);
+  }
+
+  // Summary cards
+  const endVal = portfolioByYear[horizon - 1] || invested;
+  const totalReturn = invested > 0 ? ((endVal - invested) / invested * 100) : 0;
+  const annualized = invested > 0 ? ((Math.pow(endVal / invested, 1/horizon) - 1) * 100) : 0;
+  const bestPos = active.length > 0 ? active.reduce((best, t) => {
+    const ret = (projections[t][horizon-1] - allocations[t]) / allocations[t] * 100;
+    return ret > (best.ret || -Infinity) ? {t, ret} : best;
+  }, {}) : {t:'—',ret:0};
+  const worstPos = active.length > 0 ? active.reduce((worst, t) => {
+    const ret = (projections[t][horizon-1] - allocations[t]) / allocations[t] * 100;
+    return ret < (worst.ret || Infinity) ? {t, ret} : worst;
+  }, {}) : {t:'—',ret:0};
+
+  document.getElementById('summaryRow').innerHTML = `
+    <div class="summary-card"><div class="s-label">Total Invested</div><div class="s-val">$${invested.toLocaleString()}</div><div class="s-sub">${active.length} positions</div></div>
+    <div class="summary-card"><div class="s-label">Projected Value (${horizon}Y)</div><div class="s-val ${endVal>=invested?'up':'down'}">$${Math.round(endVal).toLocaleString()}</div><div class="s-sub">${scenario} scenario</div></div>
+    <div class="summary-card"><div class="s-label">Total Return</div><div class="s-val ${totalReturn>=0?'up':'down'}">${totalReturn>=0?'+':''}${totalReturn.toFixed(1)}%</div><div class="s-sub">${annualized>=0?'+':''}${annualized.toFixed(1)}% annualized</div></div>
+    <div class="summary-card"><div class="s-label">Best Position</div><div class="s-val up">${bestPos.t}</div><div class="s-sub">+${(bestPos.ret||0).toFixed(0)}%</div></div>
+    <div class="summary-card"><div class="s-label">Worst Position</div><div class="s-val down">${worstPos.t}</div><div class="s-sub">${(worstPos.ret||0).toFixed(0)}%</div></div>
+  `;
+
+  // Projection chart
+  const labels = ['Now'];
+  for (let y = 1; y <= maxYears; y++) labels.push('Year ' + y);
+
+  const datasets = active.map((t, i) => ({
+    label: t,
+    data: [allocations[t], ...projections[t]],
+    borderColor: COLORS[tickers.indexOf(t) % COLORS.length],
+    backgroundColor: 'transparent',
+    tension: .3,
+    pointRadius: 3,
+    borderWidth: 2
+  }));
+
+  // Add portfolio total line
+  datasets.push({
+    label: 'TOTAL',
+    data: [invested, ...portfolioByYear],
+    borderColor: CC.text,
+    backgroundColor: 'rgba(225,228,235,.05)',
+    fill: true,
+    tension: .3,
+    pointRadius: 4,
+    borderWidth: 3,
+    borderDash: [6, 3]
+  });
+
+  // Also add bear/bull bands for total
+  if (scenario === 'base') {
+    const bearTotal = [], bullTotal = [];
+    for (let y = 0; y < maxYears; y++) {
+      let bv = 0, uv = 0;
+      active.forEach(t => {
+        bv += projectPosition(t, allocations[t], 'bear', maxYears)[y];
+        uv += projectPosition(t, allocations[t], 'bull', maxYears)[y];
+      });
+      bearTotal.push(bv);
+      bullTotal.push(uv);
+    }
+    datasets.push({
+      label: 'Bear Range',
+      data: [invested, ...bearTotal],
+      borderColor: 'rgba(239,68,68,.3)',
+      backgroundColor: 'rgba(239,68,68,.05)',
+      fill: '+1',
+      tension: .3,
+      pointRadius: 0,
+      borderWidth: 1,
+      borderDash: [4, 4]
+    });
+    datasets.push({
+      label: 'Bull Range',
+      data: [invested, ...bullTotal],
+      borderColor: 'rgba(34,197,94,.3)',
+      backgroundColor: 'rgba(34,197,94,.05)',
+      fill: '-1',
+      tension: .3,
+      pointRadius: 0,
+      borderWidth: 1,
+      borderDash: [4, 4]
+    });
+  }
+
+  if (projChartInst) projChartInst.destroy();
+  projChartInst = new Chart(document.getElementById('projChart'), {
+    type: 'line',
+    data: { labels, datasets },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { labels: { color: CC.text, font: { size: 11 } } }, tooltip: { mode: 'index', intersect: false, backgroundColor: '#161820', borderColor: '#23263a', borderWidth: 1, titleColor: CC.text, bodyColor: CC.muted, callbacks: { label: ctx => ctx.dataset.label + ': $' + Math.round(ctx.parsed.y).toLocaleString() } } },
+      scales: { x: { ticks: { color: CC.muted }, grid: { color: CC.grid } }, y: { ticks: { color: CC.muted, callback: v => '$' + (v/1000).toFixed(0) + 'k' }, grid: { color: CC.grid } } },
+      interaction: { mode: 'nearest', axis: 'x', intersect: false }
+    }
+  });
+
+  // Allocation donut
+  if (allocChartInst) allocChartInst.destroy();
+  allocChartInst = new Chart(document.getElementById('allocChart'), {
+    type: 'doughnut',
+    data: {
+      labels: active.map(t => t + (STOCKS[t].side === 'Short' ? ' (Short)' : '')),
+      datasets: [{ data: active.map(t => allocations[t]), backgroundColor: active.map((t, i) => COLORS[tickers.indexOf(t) % COLORS.length]), borderWidth: 0 }]
+    },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { color: CC.text, font: { size: 12 }, padding: 10 } }, tooltip: { callbacks: { label: ctx => ctx.label + ': $' + ctx.parsed.toLocaleString() + ' (' + (ctx.parsed / invested * 100).toFixed(1) + '%)' } } } }
+  });
+
+  // Position returns bar
+  if (posReturnInst) posReturnInst.destroy();
+  const posReturns = active.map(t => ({
+    t, ret: allocations[t] > 0 ? ((projections[t][horizon-1] - allocations[t]) / allocations[t] * 100) : 0
+  })).sort((a, b) => b.ret - a.ret);
+  posReturnInst = new Chart(document.getElementById('posReturnChart'), {
+    type: 'bar',
+    data: {
+      labels: posReturns.map(p => p.t),
+      datasets: [{ data: posReturns.map(p => p.ret.toFixed(1)), backgroundColor: posReturns.map(p => p.ret >= 0 ? CC.green : CC.red), borderRadius: 6 }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false, indexAxis: 'y',
+      plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ctx.parsed.x.toFixed(1) + '%' } } },
+      scales: { x: { ticks: { color: CC.muted, callback: v => v + '%' }, grid: { color: CC.grid } }, y: { ticks: { color: CC.text, font: { size: 12, weight: 'bold' } }, grid: { color: CC.grid } } }
+    }
+  });
+
+  // Sharpe proxy (return / volatility approximation)
+  if (sharpeInst) sharpeInst.destroy();
+  const sharpeData = active.map(t => {
+    const rates = GROWTH_MODELS[t];
+    const baseRet = rates.base.slice(0, horizon).reduce((s, r) => s * (1 + r/100), 1) - 1;
+    const bearRet = rates.bear.slice(0, horizon).reduce((s, r) => s * (1 + r/100), 1) - 1;
+    const bullRet = rates.bull.slice(0, horizon).reduce((s, r) => s * (1 + r/100), 1) - 1;
+    const vol = (bullRet - bearRet) / 2;
+    const sharpe = vol > 0 ? baseRet / vol : 0;
+    return { t, sharpe: sharpe.toFixed(2), ret: (baseRet * 100).toFixed(0) };
+  }).sort((a, b) => b.sharpe - a.sharpe);
+  sharpeInst = new Chart(document.getElementById('sharpeChart'), {
+    type: 'bar',
+    data: {
+      labels: sharpeData.map(d => d.t),
+      datasets: [{ label: 'Risk-Adj Return', data: sharpeData.map(d => d.sharpe), backgroundColor: sharpeData.map(d => d.sharpe >= 1 ? CC.green : d.sharpe >= 0.5 ? CC.cyan : CC.orange), borderRadius: 6 }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false, indexAxis: 'y',
+      plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => 'Sharpe proxy: ' + ctx.parsed.x + ' | Base return: ' + sharpeData[ctx.dataIndex].ret + '%' } } },
+      scales: { x: { ticks: { color: CC.muted }, grid: { color: CC.grid }, title: { display: true, text: 'Return / Risk Ratio', color: CC.muted } }, y: { ticks: { color: CC.text, font: { size: 12, weight: 'bold' } }, grid: { color: CC.grid } } }
+    }
+  });
+
+  // Returns table
+  const tbody = document.getElementById('returnsBody');
+  tbody.innerHTML = active.map(t => {
+    const p = projections[t];
+    const vals = [0, 1, 2, 4].map(y => p[y] || allocations[t]);
+    const totalRet = ((p[horizon-1] - allocations[t]) / allocations[t] * 100);
+    return `<tr>
+      <td style="font-weight:700;color:${COLORS[tickers.indexOf(t)%COLORS.length]}">${t}</td>
+      <td>${STOCKS[t].side}</td>
+      <td class="num">$${allocations[t].toLocaleString()}</td>
+      <td class="num">${(allocations[t]/STOCKS[t].price).toFixed(1)}</td>
+      ${vals.map(v => `<td class="num ${v>=allocations[t]?'up':'down'}">$${Math.round(v).toLocaleString()}</td>`).join('')}
+      <td class="num ${totalRet>=0?'up':'down'}" style="font-weight:700">${totalRet>=0?'+':''}${totalRet.toFixed(1)}%</td>
+    </tr>`;
+  }).join('');
+
+  document.getElementById('returnsFoot').innerHTML = `<tr style="background:var(--bg2);font-weight:700">
+    <td>TOTAL</td><td></td>
+    <td class="num">$${invested.toLocaleString()}</td><td></td>
+    ${[0,1,2,4].map(y => `<td class="num ${(portfolioByYear[y]||invested)>=invested?'up':'down'}">$${Math.round(portfolioByYear[y]||invested).toLocaleString()}</td>`).join('')}
+    <td class="num ${totalReturn>=0?'up':'down'}">${totalReturn>=0?'+':''}${totalReturn.toFixed(1)}%</td>
+  </tr>`;
+}
+
+// Event listeners
+document.getElementById('totalInvestment').addEventListener('input', () => recalculate());
+
+document.querySelectorAll('#scenarioBtns button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('#scenarioBtns button').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    scenario = btn.dataset.s;
+    recalculate();
+  });
+});
+
+document.querySelectorAll('#horizonBtns button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('#horizonBtns button').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    horizon = parseInt(btn.dataset.h);
+    recalculate();
+  });
+});
+
+// Init
+renderAllocGrid();
+distributeConviction();
+</script>
+</body>
+</html>
