@@ -557,6 +557,57 @@ const STOCKS = {
     risks_detail: 'Premium valuation, labor cost inflation, project execution risk, interest rate sensitivity'
   },
 
+  ADBE: {
+    ticker: 'ADBE', company: 'Adobe Inc', sector: 'Technology', exchange: 'NASDAQ',
+    price: 281, target: 420, analystTarget: 345, rating: 'Strong Buy', conviction: 9.0, side: 'Long',
+    fwdPE: 10.5, trailingPE: 14.3, evEbitda: 16.5, fwdEvEbitda: 12.5, pb: null, peg: 1.05,
+    marketCap: '119B', divYield: null, fcfYield: 8.3,
+    description: 'The world\'s dominant creative and document software platform. 90% gross margins. $9.85B annual FCF. 41M paid subscribers. 850M MAUs. Trading at 10.5x forward P/E — the cheapest valuation in over a decade and 63% below its 5-year average of 29x. The market is pricing in an AI disruption that isn\'t showing up in the numbers.',
+    quarters: [
+      { q: 'Q2 FY25', rev: 5.57, eps: 4.65, gm: 89.5, yoy: 10 },
+      { q: 'Q3 FY25', rev: 5.61, eps: 4.80, gm: 89.8, yoy: 11 },
+      { q: 'Q4 FY25', rev: 5.94, eps: 5.03, gm: 90.0, yoy: 11 },
+      { q: 'FY25 Full', rev: 23.77, eps: 20.94, gm: 89.8, yoy: 11 },
+      { q: 'Q1 FY26', rev: 6.40, eps: 6.06, gm: 90.2, yoy: 11 },
+      { q: 'FY26 (G)', rev: 26.00, eps: 23.40, gm: 90.0, yoy: 9.5, guided: true }
+    ],
+    segments: [
+      { name: 'Creative Cloud', value: 13.50, color: '#ef4444' },
+      { name: 'Document Cloud', value: 3.80, color: '#3b82f6' },
+      { name: 'Experience Cloud', value: 5.50, color: '#a855f7' },
+      { name: 'Other/Publishing', value: 0.97, color: '#f59e0b' }
+    ],
+    analysts: { buy: 18, hold: 16, sell: 5, avgTarget: 345, highTarget: 510, lowTarget: 220 },
+    bull: [
+      { title: '10.5x Forward P/E is Historically Extreme', detail: '5-year average is 28.7x. Current multiple implies 63% discount to historical norms. Even at 18x (conservative), stock is worth $420 — 49% upside.' },
+      { title: '$9.85B Annual FCF, 10% Buyback Pace', detail: 'Adobe bought back $20.3B in FY2025, retiring 10% of outstanding shares. At current price, FCF yield is 8.3%. The company is literally buying itself at a discount.' },
+      { title: '90% Gross Margins — Best-in-Class', detail: 'These are not cyclical margins. This is recurring subscription software with pricing power. 47.4% non-GAAP operating margin. This is a tier-1 software franchise.' },
+      { title: 'AI Disruption Fear is Overstated', detail: 'Subscription revenue grew 13% in Q1 FY26. Total ARR of $26B growing 10.9%. If Adobe were truly being disrupted, these metrics would be declining, not growing.' },
+      { title: 'Firefly AI is ADDITIVE, Not Cannibalistic', detail: '$250M standalone Firefly ARR, tripled YoY, 75% sequential growth. AI is enhancing Adobe\'s products, not replacing them. Enterprise is 61% of Firefly revenue.' },
+      { title: '850M MAUs + 41M Paid Subscribers', detail: 'Massive installed base with network effects. PSD/AI/INDD are industry standards taught in every design school. Switching costs are enormous.' },
+      { title: '$22.2B Remaining Performance Obligations', detail: 'RPO grew 13% YoY. 67% expected within 12 months. Provides strong forward revenue visibility.' }
+    ],
+    bear: [
+      { title: 'CEO Departure', detail: 'Shantanu Narayen stepping down after 18 years with no successor named. Leadership transition during critical AI competitive shift creates execution risk.' },
+      { title: 'AI Competition is Real', detail: 'Canva at $4B ARR (+30% growth), Figma at $1.2B ARR (+40%), Midjourney/Runway growing fast. Attacking Adobe from multiple angles.' },
+      { title: 'Net New ARR Miss', detail: 'Q1 2026 net new Digital Media ARR of $400M missed consensus of $450-460M. Early signal of competitive pressure on new customer acquisition.' },
+      { title: 'Firefly Adoption Below Target', detail: 'Only 15% of Creative Cloud users activating premium AI credits vs internal 25% target. Stock image cannibalization creating $70M ARR headwind.' },
+      { title: 'Revenue Growth Decelerating', detail: 'FY2025: 11% growth. FY2026 guidance: ~9.5%. Trajectory is slowing. Market may be pricing in further deceleration to mid-single digits.' },
+      { title: 'Goldman Sachs Sell Rating', detail: 'Most bearish analyst sentiment since 2013. Goldman has a $290 target. Institutional sentiment is actively negative.' },
+      { title: 'Churn Rate Rising', detail: '8% annualized churn rate is ticking up. Could indicate competitive alternatives gaining traction in the installed base.' }
+    ],
+    scenarios: [
+      { name: 'Deep Bear (AI disruption)', eps: 20, multiple: 8, price: 160 },
+      { name: 'Moderate Bear', eps: 22, multiple: 10, price: 220 },
+      { name: 'Base Case', eps: 23.4, multiple: 18, price: 420, highlight: true },
+      { name: 'Bull (re-rating)', eps: 25, multiple: 22, price: 550 },
+      { name: 'Ultra Bull (AI success)', eps: 27, multiple: 25, price: 675 }
+    ],
+    thesis: 'Adobe is a tier-1 software franchise trading at a deep-value discount. 10.5x forward P/E for a company with 90% gross margins, $9.85B annual FCF, and record revenue is a historic mispricing. The AI disruption narrative is not supported by the data — subscription revenue grew 13%, ARR is $26B and growing, and Firefly AI tripled YoY. The market is pricing in a catastrophic disruption that simply isn\'t happening. CEO transition is the key risk, but the installed base of 850M MAUs and 41M paid subscribers is enormously sticky. At 18x forward earnings (still well below historical average of 29x), the stock is worth $420 — 49% upside with 8.3% FCF yield as downside protection.',
+    catalysts: ['New CEO appointment (removes uncertainty)', 'Firefly AI monetization acceleration', 'Net new ARR rebound in Q2 FY26', 'Continued massive buyback at depressed valuation', 'AI narrative shift — from threat to enabler', 'Enterprise Firefly adoption expansion'],
+    risks_detail: 'CEO departure, AI competition (Canva/Figma/Midjourney), net new ARR deceleration, Firefly adoption below target, Goldman Sell rating'
+  },
+
   // SHORT POSITIONS
   TSLA: {
     ticker: 'TSLA', company: 'Tesla Inc', sector: 'Automotive', exchange: 'NASDAQ',
@@ -760,6 +811,7 @@ const STOCKS = {
 // Growth projection models for portfolio simulator
 const GROWTH_MODELS = {
   MU:   { bear: [-30, -15, 5, 10, 10], base: [55, 40, 20, 15, 10], bull: [80, 60, 30, 20, 15] },
+  ADBE: { bear: [-15, -5, 0, 5, 5], base: [25, 20, 15, 12, 10], bull: [50, 35, 25, 18, 12] },
   AVGO: { bear: [-10, 0, 5, 8, 8], base: [25, 20, 18, 15, 12], bull: [40, 35, 25, 20, 15] },
   LULU: { bear: [-15, -5, 0, 5, 5], base: [10, 15, 20, 15, 12], bull: [25, 30, 25, 20, 15] },
   CEG:  { bear: [-5, 0, 5, 8, 8], base: [20, 15, 12, 10, 8], bull: [35, 25, 20, 15, 12] },

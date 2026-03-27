@@ -202,6 +202,7 @@ footer { text-align:center; padding:32px 24px; color:var(--muted); font-size:12p
 </div>
 <div class="conviction-grid">
   <div class="conviction-item"><div class="c-ticker" style="color:var(--green)">MU</div><div class="c-score" style="color:var(--green)">9.2</div><div class="c-label">Strong Buy</div></div>
+  <div class="conviction-item"><div class="c-ticker" style="color:var(--green)">ADBE</div><div class="c-score" style="color:var(--green)">9.0</div><div class="c-label">Strong Buy</div></div>
   <div class="conviction-item"><div class="c-ticker" style="color:var(--green)">AVGO</div><div class="c-score" style="color:var(--green)">8.8</div><div class="c-label">Buy</div></div>
   <div class="conviction-item"><div class="c-ticker" style="color:var(--green)">LULU</div><div class="c-score" style="color:var(--green)">8.5</div><div class="c-label">Buy (Contrarian)</div></div>
   <div class="conviction-item"><div class="c-ticker" style="color:var(--green)">CEG</div><div class="c-score" style="color:var(--green)">8.3</div><div class="c-label">Buy</div></div>
@@ -214,7 +215,7 @@ footer { text-align:center; padding:32px 24px; color:var(--muted); font-size:12p
 <!-- LONG OPPORTUNITIES -->
 <div class="section-header" id="longs">
   <h2>Long Opportunities</h2>
-  <span class="badge">12 Active</span>
+  <span class="badge">13 Active</span>
 </div>
 <div class="stock-grid" id="longGrid">
   <!-- Cards rendered by JS -->
@@ -263,6 +264,12 @@ footer { text-align:center; padding:32px 24px; color:var(--muted); font-size:12p
     <h3>Contrarian Deep Value</h3>
     <p>Best-in-class operators beaten down by sentiment, not fundamentals. 55%+ gross margins, growing international revenue, insider buying. Buy when hated.</p>
     <div class="tickers"><span>LULU</span></div>
+  </div>
+  <div class="theme-card">
+    <div class="theme-icon">&#x1F3AF;</div>
+    <h3>AI Disruption Mispricing</h3>
+    <p>Dominant software franchises trading at deep-value multiples because the market fears AI disruption that isn't showing up in the numbers. 90% gross margins and record revenue at 10x forward P/E.</p>
+    <div class="tickers"><span>ADBE</span></div>
   </div>
   <div class="theme-card">
     <div class="theme-icon">&#x1F4C9;</div>
@@ -344,6 +351,14 @@ const longs = [
     risks:'Memory cyclicality, post-2027 capacity expansion, tariff exposure on modules',
     tags:['AI Memory','HBM','DRAM','Semiconductors'],
     sector:'Semiconductors', link:'stock.html?t=MU'
+  },
+  {
+    ticker:'ADBE', company:'Adobe Inc', price:281, fwdPE:10.5, revGrowth:11, epsGrowth:28,
+    target:420, analystTarget:345, rating:'Strong Buy', conviction:9.0,
+    thesis:'10.5x forward P/E for a 90% gross margin software franchise with $9.85B annual FCF. Record revenue. Record earnings. Stock down 44% from highs. The AI disruption narrative is not showing up in the numbers — subscription revenue grew 13%. This is MU-tier mispricing.',
+    risks:'CEO departure, AI competition (Canva/Figma/Midjourney), net new ARR deceleration',
+    tags:['Deep Value','AI Fear Discount','90% Margins','$10B FCF','Strong Buy'],
+    sector:'Technology', link:'stock.html?t=ADBE'
   },
   {
     ticker:'AVGO', company:'Broadcom Inc', price:207, fwdPE:23.2, revGrowth:29, epsGrowth:40,
