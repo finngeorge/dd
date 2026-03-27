@@ -3,16 +3,17 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Equity Analysis Dashboard — MU</title>
+<title>DD — Due Diligence Dashboard</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.1.0/dist/chartjs-plugin-annotation.min.js"></script>
 <style>
 :root {
-  --bg: #0f1117;
-  --card: #1a1d27;
-  --border: #2a2d3a;
+  --bg: #0a0b0f;
+  --bg2: #0f1117;
+  --card: #161820;
+  --card-hover: #1c1f2b;
+  --border: #23263a;
   --text: #e1e4eb;
-  --muted: #8b8fa3;
+  --muted: #7a7f96;
   --green: #22c55e;
   --red: #ef4444;
   --blue: #3b82f6;
@@ -20,733 +21,610 @@
   --orange: #f59e0b;
   --cyan: #06b6d4;
   --accent: #6366f1;
+  --pink: #ec4899;
 }
 * { margin:0; padding:0; box-sizing:border-box; }
 body { font-family: -apple-system, 'SF Pro Display', 'Inter', system-ui, sans-serif; background:var(--bg); color:var(--text); line-height:1.5; }
-.container { max-width:1440px; margin:0 auto; padding:20px; }
 
-/* Header */
-.header { display:flex; align-items:center; justify-content:space-between; padding:16px 0; border-bottom:1px solid var(--border); margin-bottom:24px; }
-.header h1 { font-size:28px; font-weight:700; }
-.header h1 span { color:var(--accent); }
-.ticker-badge { background:var(--accent); color:white; padding:6px 16px; border-radius:8px; font-weight:700; font-size:20px; }
-.header-meta { display:flex; gap:24px; align-items:center; }
-.header-meta .price { font-size:24px; font-weight:700; }
-.header-meta .change { font-size:16px; padding:4px 10px; border-radius:6px; }
-.change.neg { background:rgba(239,68,68,.15); color:var(--red); }
-.change.pos { background:rgba(34,197,94,.15); color:var(--green); }
+/* NAV */
+nav { background:var(--bg2); border-bottom:1px solid var(--border); padding:0 32px; display:flex; align-items:center; justify-content:space-between; height:56px; position:sticky; top:0; z-index:100; backdrop-filter:blur(12px); }
+nav .logo { font-size:20px; font-weight:800; letter-spacing:-0.5px; }
+nav .logo span { color:var(--accent); }
+nav .nav-links { display:flex; gap:8px; }
+nav .nav-links a { color:var(--muted); text-decoration:none; font-size:13px; font-weight:500; padding:8px 14px; border-radius:8px; transition:.15s; }
+nav .nav-links a:hover, nav .nav-links a.active { color:var(--text); background:rgba(99,102,241,.1); }
 
-/* Rating Banner */
-.rating-banner { display:grid; grid-template-columns: repeat(5, 1fr); gap:16px; margin-bottom:24px; }
-.rating-card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:20px; text-align:center; }
-.rating-card.highlight { border-color:var(--accent); box-shadow:0 0 20px rgba(99,102,241,.15); }
-.rating-card .label { font-size:12px; text-transform:uppercase; letter-spacing:1px; color:var(--muted); margin-bottom:8px; }
-.rating-card .value { font-size:28px; font-weight:700; }
-.rating-card .sub { font-size:13px; color:var(--muted); margin-top:4px; }
-.rating-buy { color:var(--green); }
-.rating-sell { color:var(--red); }
-.rating-hold { color:var(--orange); }
+.container { max-width:1480px; margin:0 auto; padding:24px 24px 80px; }
 
-/* Grid Layouts */
-.grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:20px; }
-.grid-3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:20px; margin-bottom:20px; }
-.grid-4 { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:20px; }
-.full-width { margin-bottom:20px; }
+/* HERO */
+.hero { padding:40px 0 32px; }
+.hero h1 { font-size:36px; font-weight:800; letter-spacing:-1px; margin-bottom:8px; }
+.hero h1 span { background:linear-gradient(135deg, var(--accent), var(--purple)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+.hero p { color:var(--muted); font-size:15px; max-width:640px; }
 
-/* Cards */
-.card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:20px; }
-.card h2 { font-size:16px; font-weight:600; margin-bottom:16px; display:flex; align-items:center; gap:8px; }
-.card h2 .tag { font-size:11px; background:var(--accent); color:white; padding:2px 8px; border-radius:4px; font-weight:500; }
+/* MARKET PULSE */
+.pulse-bar { display:flex; gap:12px; overflow-x:auto; padding:4px 0 20px; scrollbar-width:none; }
+.pulse-bar::-webkit-scrollbar { display:none; }
+.pulse-chip { background:var(--card); border:1px solid var(--border); border-radius:10px; padding:12px 18px; min-width:160px; flex-shrink:0; }
+.pulse-chip .label { font-size:11px; text-transform:uppercase; letter-spacing:.8px; color:var(--muted); }
+.pulse-chip .val { font-size:18px; font-weight:700; margin-top:2px; }
+.pulse-chip .delta { font-size:12px; margin-top:2px; }
+.up { color:var(--green); }
+.down { color:var(--red); }
 
-/* KPI Tiles */
-.kpi { text-align:center; }
-.kpi .label { font-size:11px; text-transform:uppercase; letter-spacing:.8px; color:var(--muted); }
-.kpi .val { font-size:22px; font-weight:700; margin:4px 0; }
-.kpi .delta { font-size:12px; }
-.delta.up { color:var(--green); }
-.delta.down { color:var(--red); }
+/* SECTION HEADERS */
+.section-header { display:flex; align-items:center; justify-content:space-between; margin:32px 0 16px; }
+.section-header h2 { font-size:20px; font-weight:700; }
+.section-header .badge { font-size:11px; background:rgba(99,102,241,.15); color:var(--accent); padding:4px 10px; border-radius:6px; font-weight:600; }
 
-/* Chart containers */
-.chart-wrap { position:relative; height:300px; }
-.chart-wrap.tall { height:400px; }
+/* STOCK GRID */
+.stock-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(340px, 1fr)); gap:16px; }
+.stock-card { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:20px; cursor:pointer; transition:.2s; position:relative; overflow:hidden; }
+.stock-card:hover { background:var(--card-hover); border-color:var(--accent); transform:translateY(-2px); box-shadow:0 8px 30px rgba(99,102,241,.08); }
+.stock-card .card-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
+.stock-card .ticker { font-size:22px; font-weight:800; letter-spacing:-0.5px; }
+.stock-card .rating-pill { padding:4px 12px; border-radius:6px; font-size:12px; font-weight:700; text-transform:uppercase; }
+.pill-buy { background:rgba(34,197,94,.15); color:var(--green); }
+.pill-strong-buy { background:rgba(34,197,94,.25); color:var(--green); }
+.pill-sell { background:rgba(239,68,68,.15); color:var(--red); }
+.pill-hold { background:rgba(245,158,11,.15); color:var(--orange); }
+.pill-watch { background:rgba(99,102,241,.15); color:var(--accent); }
+.stock-card .company { font-size:13px; color:var(--muted); margin-bottom:12px; }
+.stock-card .thesis { font-size:12.5px; color:var(--muted); line-height:1.6; margin-bottom:14px; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
+.stock-card .metrics { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+.stock-card .metric { text-align:center; }
+.stock-card .metric .m-label { font-size:10px; text-transform:uppercase; letter-spacing:.5px; color:var(--muted); }
+.stock-card .metric .m-val { font-size:15px; font-weight:700; }
+.stock-card .tags { display:flex; gap:6px; margin-top:12px; flex-wrap:wrap; }
+.stock-card .tag { font-size:10px; padding:3px 8px; border-radius:4px; background:rgba(255,255,255,.05); color:var(--muted); }
+.stock-card .upside-bar { position:absolute; bottom:0; left:0; height:3px; background:linear-gradient(90deg, var(--green), var(--cyan)); transition:.3s; }
+.stock-card.short-card .upside-bar { background:linear-gradient(90deg, var(--red), var(--orange)); }
+.stock-card .dd-link { display:none; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); background:var(--accent); color:white; padding:10px 24px; border-radius:8px; font-weight:600; font-size:14px; z-index:2; text-decoration:none; }
+.stock-card:hover .dd-link.has-link { display:block; }
 
-/* Tables */
+/* THEMES */
+.theme-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(260px, 1fr)); gap:14px; }
+.theme-card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:18px; }
+.theme-card h3 { font-size:14px; font-weight:600; margin-bottom:6px; }
+.theme-card p { font-size:12.5px; color:var(--muted); line-height:1.6; }
+.theme-card .theme-icon { font-size:24px; margin-bottom:8px; }
+.theme-card .tickers { margin-top:10px; display:flex; gap:6px; flex-wrap:wrap; }
+.theme-card .tickers span { font-size:11px; font-weight:600; padding:3px 8px; border-radius:4px; background:rgba(99,102,241,.1); color:var(--accent); }
+
+/* CHARTS ROW */
+.chart-row { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:20px; }
+.chart-card { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:20px; }
+.chart-card h3 { font-size:14px; font-weight:600; margin-bottom:14px; }
+.chart-wrap { position:relative; height:280px; }
+
+/* WATCHLIST TABLE */
+.watchlist { background:var(--card); border:1px solid var(--border); border-radius:14px; overflow:hidden; }
 table { width:100%; border-collapse:collapse; font-size:13px; }
-th, td { padding:8px 12px; text-align:left; border-bottom:1px solid var(--border); }
-th { color:var(--muted); font-weight:500; text-transform:uppercase; font-size:11px; letter-spacing:.5px; }
-td.num { text-align:right; font-variant-numeric:tabular-nums; }
-tr:hover { background:rgba(99,102,241,.05); }
+th { background:var(--bg2); padding:12px 16px; text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:.6px; color:var(--muted); font-weight:600; position:sticky; top:56px; z-index:10; }
+td { padding:12px 16px; border-bottom:1px solid var(--border); }
+td.num { text-align:right; font-variant-numeric:tabular-nums; font-weight:500; }
+th.num { text-align:right; }
+tr:hover { background:rgba(99,102,241,.04); }
+tr td:first-child { font-weight:700; }
+.sort-btn { cursor:pointer; user-select:none; }
+.sort-btn:hover { color:var(--text); }
 
-/* Bull/Bear */
-.argument-list { list-style:none; }
-.argument-list li { padding:10px 12px; border-left:3px solid; margin-bottom:8px; border-radius:0 6px 6px 0; background:rgba(255,255,255,.02); font-size:13px; }
-.bull li { border-color:var(--green); }
-.bear li { border-color:var(--red); }
-.argument-list li strong { display:block; margin-bottom:2px; }
+/* RISK DIAL */
+.conviction-grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(200px,1fr)); gap:12px; }
+.conviction-item { background:var(--card); border:1px solid var(--border); border-radius:10px; padding:14px; text-align:center; }
+.conviction-item .c-ticker { font-size:16px; font-weight:800; }
+.conviction-item .c-score { font-size:28px; font-weight:800; margin:6px 0; }
+.conviction-item .c-label { font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.6px; }
 
-/* Thesis */
-.thesis { background:linear-gradient(135deg, rgba(99,102,241,.08), rgba(168,85,247,.08)); border:1px solid rgba(99,102,241,.3); border-radius:12px; padding:24px; margin-bottom:20px; }
-.thesis h2 { font-size:20px; margin-bottom:12px; }
-.thesis p { color:var(--muted); font-size:14px; line-height:1.7; margin-bottom:12px; }
-.thesis p strong { color:var(--text); }
+/* FOOTER */
+footer { text-align:center; padding:32px 24px; color:var(--muted); font-size:12px; border-top:1px solid var(--border); margin-top:40px; }
 
-/* Position Recs */
-.positions { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
-.pos-card { border-radius:10px; padding:18px; text-align:center; }
-.pos-card.buy-card { background:rgba(34,197,94,.1); border:1px solid rgba(34,197,94,.3); }
-.pos-card.hold-card { background:rgba(245,158,11,.1); border:1px solid rgba(245,158,11,.3); }
-.pos-card.strong-buy-card { background:rgba(34,197,94,.2); border:1px solid rgba(34,197,94,.5); }
-.pos-card .horizon { font-size:12px; text-transform:uppercase; letter-spacing:1px; color:var(--muted); }
-.pos-card .rec { font-size:22px; font-weight:700; margin:8px 0 4px; }
-.pos-card .detail { font-size:12px; color:var(--muted); }
-
-/* Tabs */
-.tabs { display:flex; gap:4px; margin-bottom:16px; }
-.tab { padding:8px 16px; border-radius:8px; border:none; background:transparent; color:var(--muted); cursor:pointer; font-size:13px; font-weight:500; transition:.2s; }
-.tab:hover { background:rgba(255,255,255,.05); }
-.tab.active { background:var(--accent); color:white; }
-
-/* Sentiment gauge */
-.gauge-container { display:flex; align-items:center; gap:24px; }
-.gauge-bar { flex:1; height:24px; border-radius:12px; overflow:hidden; display:flex; }
-.gauge-bar .seg { height:100%; transition:width .5s; }
-.gauge-legend { display:flex; gap:16px; font-size:12px; margin-top:8px; }
-.gauge-legend span { display:flex; align-items:center; gap:4px; }
-.gauge-legend .dot { width:10px; height:10px; border-radius:50%; }
-
-/* Scrollbar */
-::-webkit-scrollbar { width:6px; }
-::-webkit-scrollbar-track { background:var(--bg); }
-::-webkit-scrollbar-thumb { background:var(--border); border-radius:3px; }
-
-/* SA Comment Highlights */
-.comment-box { background:rgba(255,255,255,.03); border:1px solid var(--border); border-radius:8px; padding:12px 16px; margin-bottom:10px; font-size:13px; }
-.comment-box .author { color:var(--accent); font-weight:600; font-size:12px; }
-.comment-box .likes { color:var(--muted); font-size:11px; float:right; }
-.comment-box p { margin-top:6px; color:var(--muted); }
-
-@media (max-width:1024px) {
-  .grid-2, .grid-3, .grid-4 { grid-template-columns:1fr; }
-  .rating-banner { grid-template-columns: repeat(3,1fr); }
-  .positions { grid-template-columns:1fr; }
+@media (max-width:768px) {
+  .stock-grid { grid-template-columns:1fr; }
+  .chart-row { grid-template-columns:1fr; }
+  .hero h1 { font-size:26px; }
+  nav { padding:0 16px; }
+  .container { padding:16px; }
 }
 </style>
 </head>
 <body>
+
+<nav>
+  <div class="logo"><span>DD</span> Dashboard</div>
+  <div class="nav-links">
+    <a href="#" class="active">Overview</a>
+    <a href="#longs">Longs</a>
+    <a href="#shorts">Shorts</a>
+    <a href="#themes">Themes</a>
+    <a href="#watchlist">Watchlist</a>
+  </div>
+</nav>
+
 <div class="container">
 
-<!-- HEADER -->
-<div class="header">
-  <div style="display:flex;align-items:center;gap:16px;">
-    <span class="ticker-badge">MU</span>
-    <div>
-      <h1><span>Micron Technology</span> Analysis</h1>
-      <div style="color:var(--muted);font-size:13px;">NASDAQ: MU &middot; Memory & Storage Semiconductors &middot; Updated Mar 26, 2026</div>
-    </div>
+<!-- HERO -->
+<div class="hero">
+  <h1>Due Diligence <span>Dashboard</span></h1>
+  <p>Systematic equity analysis tracking high-conviction long and short opportunities across sectors. Research-driven, fundamentally grounded, financially responsible.</p>
+</div>
+
+<!-- MARKET PULSE -->
+<div class="pulse-bar">
+  <div class="pulse-chip">
+    <div class="label">S&P 500</div>
+    <div class="val">5,488</div>
+    <div class="delta down">-1.9% YTD</div>
   </div>
-  <div class="header-meta">
-    <div>
-      <div class="price">$355.46</div>
-      <span class="change neg">-$115.88 (-24.6%) from ATH</span>
-    </div>
+  <div class="pulse-chip">
+    <div class="label">NASDAQ</div>
+    <div class="val">17,322</div>
+    <div class="delta down">-4.2% YTD</div>
+  </div>
+  <div class="pulse-chip">
+    <div class="label">Fed Rate</div>
+    <div class="val">4.50%</div>
+    <div class="delta" style="color:var(--muted)">Holding</div>
+  </div>
+  <div class="pulse-chip">
+    <div class="label">Hyperscaler CapEx '26</div>
+    <div class="val up">$690B</div>
+    <div class="delta up">+36% YoY</div>
+  </div>
+  <div class="pulse-chip">
+    <div class="label">HBM TAM '26</div>
+    <div class="val up">$56B</div>
+    <div class="delta up">+60% YoY</div>
+  </div>
+  <div class="pulse-chip">
+    <div class="label">VIX</div>
+    <div class="val" style="color:var(--orange)">22.4</div>
+    <div class="delta down">Elevated</div>
+  </div>
+  <div class="pulse-chip">
+    <div class="label">U.S. Defense Budget</div>
+    <div class="val up">$1.5T</div>
+    <div class="delta up">Record</div>
+  </div>
+  <div class="pulse-chip">
+    <div class="label">GLP-1 Market '30E</div>
+    <div class="val" style="color:var(--purple)">$100B</div>
+    <div class="delta up">42% CAGR</div>
   </div>
 </div>
 
-<!-- RATING BANNER -->
-<div class="rating-banner">
-  <div class="rating-card highlight">
-    <div class="label">Our Rating</div>
-    <div class="value rating-buy">BUY</div>
-    <div class="sub">Conviction: High</div>
+<!-- CONVICTION SCORES -->
+<div class="section-header">
+  <h2>Conviction Scores</h2>
+  <span class="badge">Updated Mar 26</span>
+</div>
+<div class="conviction-grid">
+  <div class="conviction-item"><div class="c-ticker" style="color:var(--green)">MU</div><div class="c-score" style="color:var(--green)">9.2</div><div class="c-label">Strong Buy</div></div>
+  <div class="conviction-item"><div class="c-ticker" style="color:var(--green)">AVGO</div><div class="c-score" style="color:var(--green)">8.8</div><div class="c-label">Buy</div></div>
+  <div class="conviction-item"><div class="c-ticker" style="color:var(--green)">LULU</div><div class="c-score" style="color:var(--green)">8.5</div><div class="c-label">Buy (Contrarian)</div></div>
+  <div class="conviction-item"><div class="c-ticker" style="color:var(--green)">CEG</div><div class="c-score" style="color:var(--green)">8.3</div><div class="c-label">Buy</div></div>
+  <div class="conviction-item"><div class="c-ticker" style="color:var(--green)">LLY</div><div class="c-score" style="color:var(--green)">8.0</div><div class="c-label">Buy</div></div>
+  <div class="conviction-item"><div class="c-ticker" style="color:var(--cyan)">ANET</div><div class="c-score" style="color:var(--cyan)">7.8</div><div class="c-label">Buy</div></div>
+  <div class="conviction-item"><div class="c-ticker" style="color:var(--cyan)">CCJ</div><div class="c-score" style="color:var(--cyan)">7.5</div><div class="c-label">Buy</div></div>
+  <div class="conviction-item"><div class="c-ticker" style="color:var(--red)">TSLA</div><div class="c-score" style="color:var(--red)">8.1</div><div class="c-label">Short</div></div>
+</div>
+
+<!-- LONG OPPORTUNITIES -->
+<div class="section-header" id="longs">
+  <h2>Long Opportunities</h2>
+  <span class="badge">12 Active</span>
+</div>
+<div class="stock-grid" id="longGrid">
+  <!-- Cards rendered by JS -->
+</div>
+
+<!-- SHORT OPPORTUNITIES -->
+<div class="section-header" id="shorts">
+  <h2>Short / Overvalued Candidates</h2>
+  <span class="badge">5 Active</span>
+</div>
+<div class="stock-grid" id="shortGrid">
+  <!-- Cards rendered by JS -->
+</div>
+
+<!-- MACRO THEMES -->
+<div class="section-header" id="themes">
+  <h2>Macro Themes Driving the Book</h2>
+</div>
+<div class="theme-grid">
+  <div class="theme-card">
+    <div class="theme-icon">&#x1F9E0;</div>
+    <h3>AI Infrastructure Supercycle</h3>
+    <p>$690B hyperscaler capex in 2026. Memory, networking, power, cooling — the entire stack benefits. This is the largest infrastructure buildout since the internet.</p>
+    <div class="tickers"><span>MU</span><span>AVGO</span><span>ANET</span><span>VRT</span><span>PWR</span></div>
   </div>
-  <div class="rating-card">
-    <div class="label">12-Mo Price Target</div>
-    <div class="value" style="color:var(--cyan);">$550</div>
-    <div class="sub">+54.7% upside</div>
+  <div class="theme-card">
+    <div class="theme-icon">&#x2622;&#xFE0F;</div>
+    <h3>Nuclear Renaissance</h3>
+    <p>AI data centers need 24/7 baseload power. Nuclear is the only scalable carbon-free option. Uranium in structural deficit. 20-year PPAs being signed.</p>
+    <div class="tickers"><span>CEG</span><span>CCJ</span></div>
   </div>
-  <div class="rating-card">
-    <div class="label">Forward P/E</div>
-    <div class="value">4.4x</div>
-    <div class="sub">vs Semi avg 40.9x</div>
+  <div class="theme-card">
+    <div class="theme-icon">&#x1F6E1;&#xFE0F;</div>
+    <h3>Global Rearmament</h3>
+    <p>$1.5T U.S. defense budget. NATO allies racing to 2%+ GDP. Middle East tensions. Submarine programs, missile systems, cyber defense all surging.</p>
+    <div class="tickers"><span>GD</span><span>RTX</span></div>
   </div>
-  <div class="rating-card">
-    <div class="label">FQ3 '26 Rev Guide</div>
-    <div class="value" style="color:var(--green);">$33.5B</div>
-    <div class="sub">+40% QoQ sequential</div>
+  <div class="theme-card">
+    <div class="theme-icon">&#x1F489;</div>
+    <h3>GLP-1 / Obesity Revolution</h3>
+    <p>$100B market by 2030. Oral formulations remove injection barrier. Medicare coverage starting mid-2026. Reshaping pharma, food, insurance industries.</p>
+    <div class="tickers"><span>LLY</span></div>
   </div>
-  <div class="rating-card">
-    <div class="label">Gross Margin Guide</div>
-    <div class="value" style="color:var(--green);">81%</div>
-    <div class="sub">All-time record</div>
+  <div class="theme-card">
+    <div class="theme-icon">&#x1F6D2;</div>
+    <h3>Contrarian Deep Value</h3>
+    <p>Best-in-class operators beaten down by sentiment, not fundamentals. 55%+ gross margins, growing international revenue, insider buying. Buy when hated.</p>
+    <div class="tickers"><span>LULU</span></div>
+  </div>
+  <div class="theme-card">
+    <div class="theme-icon">&#x1F4C9;</div>
+    <h3>Valuation Disconnects (Short)</h3>
+    <p>Companies trading at extreme multiples with decelerating growth, executive distraction, or structural headwinds. Premium priced for perfection that isn't coming.</p>
+    <div class="tickers"><span>TSLA</span><span>PLTR</span><span>SNOW</span></div>
   </div>
 </div>
 
-<!-- KPI TILES -->
-<div class="grid-4">
-  <div class="card kpi">
-    <div class="label">FQ2 Revenue</div>
-    <div class="val">$23.86B</div>
-    <div class="delta up">+196% YoY</div>
+<!-- CHARTS -->
+<div class="section-header">
+  <h2>Forward P/E Comparison</h2>
+</div>
+<div class="chart-row">
+  <div class="chart-card">
+    <h3>Forward P/E vs Growth Rate — Long Book</h3>
+    <div class="chart-wrap"><canvas id="peGrowthChart"></canvas></div>
   </div>
-  <div class="card kpi">
-    <div class="label">GAAP EPS</div>
-    <div class="val">$12.07</div>
-    <div class="delta up">Beat by $4.32B rev</div>
+  <div class="chart-card">
+    <h3>Upside to Price Target (%)</h3>
+    <div class="chart-wrap"><canvas id="upsideChart"></canvas></div>
   </div>
-  <div class="card kpi">
-    <div class="label">HBM Revenue Run-Rate</div>
-    <div class="val">~$8B/yr</div>
-    <div class="delta up">Sold out thru 2027</div>
+</div>
+<div class="chart-row">
+  <div class="chart-card">
+    <h3>Conviction vs Risk Assessment</h3>
+    <div class="chart-wrap"><canvas id="convictionChart"></canvas></div>
   </div>
-  <div class="card kpi">
-    <div class="label">Market Cap</div>
-    <div class="val">$394B</div>
-    <div class="delta down">-25% from ATH</div>
+  <div class="chart-card">
+    <h3>Sector Allocation — Long Book</h3>
+    <div class="chart-wrap"><canvas id="sectorChart"></canvas></div>
   </div>
 </div>
 
-<!-- REVENUE & MARGIN CHARTS -->
-<div class="grid-2">
-  <div class="card">
-    <h2>Quarterly Revenue Trajectory <span class="tag">FQ2'25 → FQ3'26 Guide</span></h2>
-    <div class="chart-wrap"><canvas id="revenueChart"></canvas></div>
-  </div>
-  <div class="card">
-    <h2>Gross Margin Expansion</h2>
-    <div class="chart-wrap"><canvas id="marginChart"></canvas></div>
-  </div>
+<!-- WATCHLIST TABLE -->
+<div class="section-header" id="watchlist">
+  <h2>Full Watchlist</h2>
 </div>
-
-<!-- EPS & VALUATION -->
-<div class="grid-2">
-  <div class="card">
-    <h2>EPS Trajectory (GAAP)</h2>
-    <div class="chart-wrap"><canvas id="epsChart"></canvas></div>
-  </div>
-  <div class="card">
-    <h2>Valuation Multiples vs History</h2>
-    <div class="chart-wrap"><canvas id="valuationChart"></canvas></div>
-  </div>
-</div>
-
-<!-- SEGMENT BREAKDOWN -->
-<div class="grid-2">
-  <div class="card">
-    <h2>FQ2 2026 Revenue by Segment</h2>
-    <div class="chart-wrap"><canvas id="segmentChart"></canvas></div>
-  </div>
-  <div class="card">
-    <h2>DRAM vs NAND Mix</h2>
-    <div class="chart-wrap"><canvas id="productMixChart"></canvas></div>
-  </div>
-</div>
-
-<!-- HBM MARKET -->
-<div class="grid-2">
-  <div class="card">
-    <h2>HBM Total Addressable Market <span class="tag">$B</span></h2>
-    <div class="chart-wrap"><canvas id="hbmTamChart"></canvas></div>
-  </div>
-  <div class="card">
-    <h2>HBM Market Share (Q2 2025)</h2>
-    <div class="chart-wrap"><canvas id="hbmShareChart"></canvas></div>
-  </div>
-</div>
-
-<!-- HYPERSCALER CAPEX -->
-<div class="full-width card">
-  <h2>Hyperscaler AI CapEx (2026 Projected) <span class="tag">$B — ~75% AI-related</span></h2>
-  <div class="chart-wrap"><canvas id="capexChart"></canvas></div>
-</div>
-
-<!-- CYCLE ANALYSIS -->
-<div class="full-width card">
-  <h2>DRAM Cycle Analysis — Historical EV/Sales Peaks & Troughs</h2>
-  <p style="color:var(--muted);font-size:13px;margin-bottom:16px;">The Seeking Alpha bear thesis centers on cyclicality. Historical DRAM sector EV/Sales peaks at ~3.2x. Current sector at 3.18x TTM. MU trades at 8.11x TTM — BUT forward metrics tell a different story.</p>
-  <div class="chart-wrap tall"><canvas id="cycleChart"></canvas></div>
-</div>
-
-<!-- COMPETITIVE COMPARISON -->
-<div class="full-width card">
-  <h2>Competitive Landscape — MU vs SK Hynix vs Samsung</h2>
-  <table>
+<div class="watchlist">
+  <table id="watchlistTable">
     <thead>
-      <tr><th>Dimension</th><th>Micron (MU)</th><th>SK Hynix</th><th>Samsung</th></tr>
+      <tr>
+        <th class="sort-btn" data-col="0">Ticker</th>
+        <th class="sort-btn" data-col="1">Company</th>
+        <th class="sort-btn num" data-col="2">Price</th>
+        <th class="sort-btn num" data-col="3">Fwd P/E</th>
+        <th class="sort-btn num" data-col="4">Rev Growth</th>
+        <th class="sort-btn num" data-col="5">Target</th>
+        <th class="sort-btn num" data-col="6">Upside</th>
+        <th class="sort-btn" data-col="7">Rating</th>
+        <th class="sort-btn" data-col="8">Side</th>
+        <th>DD</th>
+      </tr>
     </thead>
-    <tbody>
-      <tr><td>HBM Market Share</td><td>~11-25% (growing)</td><td>~53-62% (leader)</td><td>~17-35% (volatile)</td></tr>
-      <tr><td>DRAM Ranking</td><td>#3</td><td>#1 (overtook Samsung)</td><td>#2</td></tr>
-      <tr><td>HBM4 Status</td><td style="color:var(--green)">Volume shipping Q1 2026</td><td>12-layer samples done</td><td>Catching up fast</td></tr>
-      <tr><td>2026 CapEx</td><td>$20-25B+</td><td>4x prior plans</td><td>50% capacity expansion</td></tr>
-      <tr><td>Key Advantage</td><td>30% lower power, U.S. mfg</td><td>Scale + NVIDIA relationship</td><td>Diversified, massive resources</td></tr>
-      <tr><td>Forward P/E</td><td style="color:var(--green)">~4.4x</td><td>~2x (cheaper but Korea risk)</td><td>N/A (conglomerate)</td></tr>
-      <tr><td>CHIPS Act Funding</td><td style="color:var(--green)">$6.4B secured</td><td>None (Korean)</td><td>None (Korean)</td></tr>
-      <tr><td>U.S. Listing</td><td>NASDAQ</td><td>Planning U.S. listing</td><td>Korea only</td></tr>
-    </tbody>
+    <tbody id="watchlistBody"></tbody>
   </table>
-</div>
-
-<!-- BULL vs BEAR -->
-<div class="grid-2">
-  <div class="card">
-    <h2 style="color:var(--green);">Bull Case</h2>
-    <ul class="argument-list bull">
-      <li><strong>AI Memory Supercycle is Structural</strong>Every GPU needs massive HBM/DRAM/NAND. $660-690B hyperscaler capex in 2026 alone. This is infrastructure buildout, not a fad.</li>
-      <li><strong>HBM Sold Out Through 2027</strong>Non-cancellable, fixed-price contracts provide unprecedented revenue visibility. This IS structurally different from spot-market cycles.</li>
-      <li><strong>81% Gross Margin is Unprecedented</strong>Never in Micron's history. Reflects pricing power + product mix shift to high-value HBM/server DRAM. Not just a cycle peak metric.</li>
-      <li><strong>Forward P/E of ~4.4x is Absurdly Cheap</strong>Semi industry avg is 40.9x. Even applying a harsh cyclical discount, MU is mispriced. PEG ratio of 0.2 vs fair value of 1.0.</li>
-      <li><strong>$90+ EPS Expected FY2027</strong>At just 6x earnings, that's $540. At 10x (still below semi avg), that's $900. Current price implies earnings crater 80%+ — unlikely before 2028.</li>
-      <li><strong>Supply Constraints Persist Until 2028</strong>New fabs take years. Industry supply growth of ~16% is well below AI-driven demand growth. No capacity glut imminent.</li>
-      <li><strong>Oligopoly Structure</strong>Only 3 companies make DRAM/HBM globally. Consolidation from 23 companies in 1986. Rational supply discipline is more likely than historical periods.</li>
-      <li><strong>NAND Recovery Adds Another Growth Leg</strong>Enterprise SSD pricing up >25% sequentially. G9 node ramping. NAND was 20% of revenue and accelerating.</li>
-    </ul>
-  </div>
-  <div class="card">
-    <h2 style="color:var(--red);">Bear Case (SA Article + Other)</h2>
-    <ul class="argument-list bear">
-      <li><strong>Cyclicality is Eternal (SA Core Thesis)</strong>Memory has been cyclical for 40+ years through every "secular" demand driver (PCs, mobile, cloud). EV/Sales at historical peak of 3.18x sector-wide.</li>
-      <li><strong>EV/Sales at 8.11x TTM is Historically Extreme</strong>Previous cycle peaks for MU were at much lower multiples. Reversion to mean implies >50% downside.</li>
-      <li><strong>Google TurboQuant / Memory Efficiency</strong>6x compression of KV cache memory. Counter: this mainly affects inference DRAM, NOT HBM for training. Overstated risk but worth monitoring.</li>
-      <li><strong>Tariff Exposure</strong>Memory modules/SSDs (not bare chips) subject to tariffs. Could dampen consumer demand and create pricing pressure. Stock already -14% on tariff news.</li>
-      <li><strong>Post-2027 Cliff Risk</strong>When Samsung/SK Hynix capacity expansions complete and if AI spending moderates, pricing could normalize rapidly.</li>
-      <li><strong>China Market Loss</strong>Exited Chinese server market after government ban. Further retaliatory actions could impact remaining mobile/auto business.</li>
-      <li><strong>Customer Concentration</strong>Heavy reliance on NVIDIA ecosystem and a few hyperscalers. Any slowdown in their spending directly impacts Micron.</li>
-      <li><strong>Long-Term Contracts ≠ Long-Term Demand</strong>SA author argues contracts exist because of high prices, not the reverse. Customers can renegotiate or reduce future orders.</li>
-    </ul>
-  </div>
-</div>
-
-<!-- SA ARTICLE ANALYSIS -->
-<div class="full-width card">
-  <h2>Seeking Alpha Article Assessment <span class="tag">Envision Research — Mar 25, 2026</span></h2>
-  <div class="grid-2" style="margin-bottom:0;">
-    <div>
-      <h3 style="font-size:14px;color:var(--orange);margin-bottom:12px;">Article's Key Arguments</h3>
-      <p style="font-size:13px;color:var(--muted);margin-bottom:8px;">1. DRAM sector EV/Sales at 3.18x TTM — near historical cyclical peak of 3.2x</p>
-      <p style="font-size:13px;color:var(--muted);margin-bottom:8px;">2. MU trades at 8.11x TTM EV/Sales — well above any historical cycle peak</p>
-      <p style="font-size:13px;color:var(--muted);margin-bottom:8px;">3. Historical 4-year cycles have not been disrupted by past "secular" demand drivers</p>
-      <p style="font-size:13px;color:var(--muted);margin-bottom:8px;">4. Long-term contracts are effect of high prices, not cause of sustained demand</p>
-      <p style="font-size:13px;color:var(--muted);margin-bottom:8px;">5. Stock has historically corrected 50%+ during contraction cycles</p>
-      <p style="font-size:13px;color:var(--muted);margin-bottom:16px;">6. Rating downgraded from Hold to Sell</p>
-      <h3 style="font-size:14px;color:var(--muted);margin-bottom:8px;">Author Track Record (per comments)</h3>
-      <p style="font-size:13px;color:var(--red);">Previous "Strong Sell" on PLTR in late 2024 → stock subsequently +140%. Strong Buy on PYPL → stock -40%. Buy on MSFT → stock -30%. Strong Buy on SMCI → stock -50%. Accuracy is mixed at best.</p>
-    </div>
-    <div>
-      <h3 style="font-size:14px;color:var(--green);margin-bottom:12px;">Our Counterarguments</h3>
-      <p style="font-size:13px;color:var(--muted);margin-bottom:8px;"><strong style="color:var(--text);">On EV/Sales:</strong> TTM EV/Sales is misleading when revenue is tripling. FWD EV/Sales of 4.11x is high but justified by 81% margins (historically 30-40%).</p>
-      <p style="font-size:13px;color:var(--muted);margin-bottom:8px;"><strong style="color:var(--text);">On cyclicality:</strong> Valid historically, but the industry consolidated from 23 to 3 players. Oligopoly pricing discipline + multi-year contracts are genuinely new structural features.</p>
-      <p style="font-size:13px;color:var(--muted);margin-bottom:8px;"><strong style="color:var(--text);">On "this time is different":</strong> It doesn't need to be permanent — even 2 more years of supercycle earnings at current valuations makes MU a buy. The question is timing, not if.</p>
-      <p style="font-size:13px;color:var(--muted);margin-bottom:8px;"><strong style="color:var(--text);">On contracts:</strong> Non-cancellable contracts with fixed pricing ARE a structural change vs spot market. Even if demand softens post-2027, 2026-2027 earnings are locked in.</p>
-      <p style="font-size:13px;color:var(--muted);margin-bottom:8px;"><strong style="color:var(--text);">On PEG ratio:</strong> Commenters correctly note PEG of 0.2 — the market is pricing in an 80%+ earnings decline that would need to happen almost immediately to justify current price.</p>
-      <p style="font-size:13px;color:var(--muted);"><strong style="color:var(--text);">SA Quant Rating:</strong> 4.99/5.00 (nearly perfect). 25-30 Wall Street analysts rate Buy/Strong Buy. Zero Sells.</p>
-    </div>
-  </div>
-</div>
-
-<!-- SA COMMENT HIGHLIGHTS -->
-<div class="full-width card">
-  <h2>Notable SA Comments <span class="tag">Sentiment: Overwhelmingly Bullish</span></h2>
-  <div class="grid-2" style="margin-bottom:0;">
-    <div>
-      <div class="comment-box">
-        <span class="author">sme20</span><span class="likes">5 likes</span>
-        <p>"MU PEG ratio is currently about 0.2 — fair value is generally around 1.0. Forward EV/sales are not really that elevated... SA quant rating has MU at 4.99. It's practically a perfect score."</p>
-      </div>
-      <div class="comment-box">
-        <span class="author">WeberC_CPA</span><span class="likes">26 likes</span>
-        <p>"AI-driven HBM demand, better visibility through long-term contracts, tighter inventories, and a stronger strategic role in the compute stack all suggest Micron may deserve to be analyzed as an improved business."</p>
-      </div>
-      <div class="comment-box">
-        <span class="author">BeeVee24</span><span class="likes">19 likes</span>
-        <p>"How does TSLA trade at 185 FWD PE with falling EV sales... PLTR at FWD PE of 117, yet MU is trading at a 7 FWD PE, healthy balance sheet? The market is truly detached from reality."</p>
-      </div>
-    </div>
-    <div>
-      <div class="comment-box">
-        <span class="author">gcbrock44</span><span class="likes">4 likes</span>
-        <p>"Add together the most recent EPS estimates for the next 5 years and you get $296. MU is at $370. That's just $74 over what they will earn over the next 5 years."</p>
-      </div>
-      <div class="comment-box">
-        <span class="author">adfadfadfadfadf</span><span class="likes">20 likes</span>
-        <p>"This guy's only 'Strong Sell' was PLTR in late 2024. It has since increased 140%. He rated SMCI as strong buy, it has since dropped 50%. He can't handle the growth."</p>
-      </div>
-      <div class="comment-box">
-        <span class="author">ND1981goIrish!</span><span class="likes">—</span>
-        <p>"The 'FOLG' (Fear of Losing Gains) crowd is in full force now... This has nothing to do with fundamentals. It's classic fear that has its grip on the stock."</p>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- COMMENT SENTIMENT -->
-<div class="full-width card">
-  <h2>SA Comment Sentiment Analysis (62 comments)</h2>
-  <div style="margin-bottom:12px;">
-    <div class="gauge-bar">
-      <div class="seg" style="width:75%;background:var(--green);"></div>
-      <div class="seg" style="width:10%;background:var(--orange);"></div>
-      <div class="seg" style="width:15%;background:var(--red);"></div>
-    </div>
-  </div>
-  <div class="gauge-legend">
-    <span><span class="dot" style="background:var(--green)"></span> Bullish (75%)</span>
-    <span><span class="dot" style="background:var(--orange)"></span> Neutral (10%)</span>
-    <span><span class="dot" style="background:var(--red)"></span> Bearish (15%)</span>
-  </div>
-  <p style="color:var(--muted);font-size:13px;margin-top:12px;">Most-liked comments are overwhelmingly bullish. Bear comments focus on cyclicality and TurboQuant. Several commenters questioned the author's track record. Notable: no substantive new bear arguments beyond historical pattern-matching.</p>
-</div>
-
-<!-- THESIS -->
-<div class="thesis">
-  <h2>Investment Thesis</h2>
-  <p><strong>Micron is experiencing the most powerful demand environment in the history of the memory industry</strong>, driven by an AI infrastructure buildout that has no precedent in scale or duration. The Seeking Alpha bear thesis — that memory is cyclical and current valuations reflect a cycle peak — is historically valid but fails to account for three genuinely structural changes: (1) industry consolidation to 3 players enabling pricing discipline, (2) multi-year non-cancellable contracts providing 2+ years of earnings visibility, and (3) HBM as a new high-margin product category that didn't exist in prior cycles.</p>
-  <p>At a forward P/E of ~4.4x with 81% gross margins guided and $90+ EPS expected for FY2027, the market is pricing in an immediate and severe earnings collapse. We believe this is premature by at least 18-24 months. Even applying a harsh cyclical discount of 6x to FY2027 EPS of $90 yields a $540 stock — 52% above current levels. The risk-reward is asymmetric to the upside.</p>
-  <p><strong>Key risk:</strong> The bear case is not wrong, just early. A cycle downturn WILL come eventually — likely 2028+ when capacity expansion completes. The correct strategy is to ride the supercycle earnings while they last and tighten stops as we approach late 2027. <strong>The current selloff (-25% from ATH) on tariff fears and TurboQuant noise is a gift for those with a 12+ month horizon.</strong></p>
-  <p><strong>Price Target: $550</strong> (12-month) — based on 6x FY2027E EPS of $90. Conservative multiple reflects cyclical discount. Upside to $700+ if market re-rates to even 8x.</p>
-</div>
-
-<!-- POSITION RECOMMENDATIONS -->
-<div class="full-width card">
-  <h2>Position Recommendations</h2>
-  <div class="positions">
-    <div class="pos-card hold-card">
-      <div class="horizon">Very Short-Term (1-4 weeks)</div>
-      <div class="rec" style="color:var(--orange);">ACCUMULATE</div>
-      <div class="detail">Sentiment-driven selling may continue. Tariff uncertainty + technical breakdown. Use weakness to build position. Layer in at $340-$370. Don't try to catch the exact bottom.</div>
-    </div>
-    <div class="pos-card buy-card">
-      <div class="horizon">Short-Term (1-6 months)</div>
-      <div class="rec" style="color:var(--green);">BUY</div>
-      <div class="detail">FQ3 results (~June) will show $33.5B revenue and 81% margins — a massive beat-and-raise cycle likely continues. Post-earnings drift typically resolves within 60 days. Target: $450-500.</div>
-    </div>
-    <div class="pos-card strong-buy-card">
-      <div class="horizon">Long-Term (6-18 months)</div>
-      <div class="rec" style="color:var(--green);">STRONG BUY</div>
-      <div class="detail">AI supercycle has legs through 2027 minimum. $90+ EPS at 6x = $540. At peer-relative valuations, $700+. Begin tightening stops in late 2027 as capacity expansion completes. Target: $550.</div>
-    </div>
-  </div>
-</div>
-
-<!-- WALL STREET CONSENSUS -->
-<div class="grid-2">
-  <div class="card">
-    <h2>Wall Street Analyst Distribution</h2>
-    <div class="chart-wrap"><canvas id="analystChart"></canvas></div>
-  </div>
-  <div class="card">
-    <h2>Scenario Analysis — 12-Month Price Targets</h2>
-    <table>
-      <thead><tr><th>Scenario</th><th>FY27 EPS</th><th>Multiple</th><th>Price</th><th>Return</th></tr></thead>
-      <tbody>
-        <tr><td>Deep Bear (cycle crash)</td><td class="num">$30</td><td class="num">5x</td><td class="num" style="color:var(--red)">$150</td><td class="num" style="color:var(--red)">-58%</td></tr>
-        <tr><td>Moderate Bear</td><td class="num">$60</td><td class="num">5x</td><td class="num" style="color:var(--red)">$300</td><td class="num" style="color:var(--red)">-16%</td></tr>
-        <tr><td style="font-weight:600">Base Case (Our Target)</td><td class="num" style="font-weight:600">$90</td><td class="num" style="font-weight:600">6x</td><td class="num;font-weight:600" style="color:var(--green);font-weight:600">$550</td><td class="num" style="color:var(--green);font-weight:600">+55%</td></tr>
-        <tr><td>Bull Case</td><td class="num">$95</td><td class="num">8x</td><td class="num" style="color:var(--green)">$760</td><td class="num" style="color:var(--green)">+114%</td></tr>
-        <tr><td>Ultra Bull (re-rating)</td><td class="num">$100</td><td class="num">10x</td><td class="num" style="color:var(--green)">$1000</td><td class="num" style="color:var(--green)">+181%</td></tr>
-      </tbody>
-    </table>
-    <p style="color:var(--muted);font-size:12px;margin-top:12px;">Probability-weighted expected value: ~$520 (+46% upside). Risk/reward strongly favors longs at current levels.</p>
-  </div>
-</div>
-
-<!-- RISK MATRIX -->
-<div class="full-width card">
-  <h2>Risk Factor Assessment</h2>
-  <div class="chart-wrap"><canvas id="riskChart"></canvas></div>
-</div>
-
-<!-- FINANCIAL SUMMARY TABLE -->
-<div class="full-width card">
-  <h2>Financial Summary — Quarterly Progression</h2>
-  <table>
-    <thead>
-      <tr><th>Quarter</th><th class="num">Revenue</th><th class="num">YoY Growth</th><th class="num">Gross Margin</th><th class="num">GAAP EPS</th><th class="num">Op Cash Flow</th><th>Notes</th></tr>
-    </thead>
-    <tbody>
-      <tr><td>FQ2 2025 (Feb '25)</td><td class="num">$8.05B</td><td class="num">+38%</td><td class="num">37.9%</td><td class="num">$1.56</td><td class="num">—</td><td>HBM crossed $1B quarterly</td></tr>
-      <tr><td>FQ3 2025 (May '25)</td><td class="num">$9.30B</td><td class="num">+37%</td><td class="num">39.0%</td><td class="num">$1.91</td><td class="num">—</td><td>Margin expansion begins</td></tr>
-      <tr><td>FQ4 2025 (Aug '25)</td><td class="num">$11.32B</td><td class="num">+46%</td><td class="num">45.7%</td><td class="num">$3.03</td><td class="num">$5.73B</td><td>FY25: $37.4B rev, +49%</td></tr>
-      <tr><td>FQ1 2026 (Nov '25)</td><td class="num">$13.64B</td><td class="num">+57%</td><td class="num">~56%</td><td class="num">$4.78</td><td class="num">$8.41B</td><td>NAND 20% of rev at $2.7B</td></tr>
-      <tr style="background:rgba(99,102,241,.08)"><td><strong>FQ2 2026 (Feb '26)</strong></td><td class="num"><strong>$23.86B</strong></td><td class="num" style="color:var(--green)"><strong>+196%</strong></td><td class="num"><strong>74.9%</strong></td><td class="num"><strong>$12.07</strong></td><td class="num"><strong>Record</strong></td><td>Beat estimates by $4.32B</td></tr>
-      <tr style="background:rgba(34,197,94,.08)"><td><strong>FQ3 2026 (Guide)</strong></td><td class="num"><strong>$33.5B</strong></td><td class="num" style="color:var(--green)"><strong>~+260%E</strong></td><td class="num"><strong>~81%</strong></td><td class="num"><strong>$18.90</strong></td><td class="num">—</td><td>Unprecedented guidance</td></tr>
-    </tbody>
-  </table>
-</div>
-
-<div style="text-align:center;padding:24px;color:var(--muted);font-size:12px;border-top:1px solid var(--border);margin-top:20px;">
-  Equity Analysis Dashboard v1.0 — For informational purposes only. Not financial advice. Data as of March 26, 2026.<br>
-  Built for multi-company analysis. MU is the first iteration.
 </div>
 
 </div><!-- /container -->
 
+<footer>
+  DD Dashboard v1.0 — For informational and educational purposes only. Not financial advice.<br>
+  Data sourced from public filings, analyst reports, and market research as of March 26, 2026.
+</footer>
+
 <script>
-const colors = {
-  green: '#22c55e', red: '#ef4444', blue: '#3b82f6',
-  purple: '#a855f7', orange: '#f59e0b', cyan: '#06b6d4',
-  accent: '#6366f1', muted: '#8b8fa3', text: '#e1e4eb',
-  grid: 'rgba(42,45,58,.6)'
+const C = {
+  green:'#22c55e', red:'#ef4444', blue:'#3b82f6', purple:'#a855f7',
+  orange:'#f59e0b', cyan:'#06b6d4', accent:'#6366f1', pink:'#ec4899',
+  muted:'#7a7f96', text:'#e1e4eb', grid:'rgba(35,38,58,.6)'
 };
 
-const defaultOpts = {
-  responsive: true,
-  maintainAspectRatio: false,
-  plugins: {
-    legend: { labels: { color: colors.text, font: { size: 11 } } },
-    tooltip: { backgroundColor: '#1a1d27', borderColor: '#2a2d3a', borderWidth: 1, titleColor: colors.text, bodyColor: colors.muted, padding: 12, cornerRadius: 8 }
+// ── DATA ──
+const longs = [
+  {
+    ticker:'MU', company:'Micron Technology', price:355, fwdPE:4.4, revGrowth:196, epsGrowth:682,
+    target:550, analystTarget:490, rating:'Strong Buy', conviction:9.2,
+    thesis:'Forward P/E of 4.4x with 196% revenue growth and 81% guided gross margins. HBM sold out through 2027. The most mispriced large-cap in the market. Current selloff is a gift.',
+    risks:'Memory cyclicality, post-2027 capacity expansion, tariff exposure on modules',
+    tags:['AI Memory','HBM','DRAM','Semiconductors'],
+    sector:'Semiconductors', link:'mu.html'
   },
-  scales: {
-    x: { ticks: { color: colors.muted, font: { size: 11 } }, grid: { color: colors.grid } },
-    y: { ticks: { color: colors.muted, font: { size: 11 } }, grid: { color: colors.grid } }
+  {
+    ticker:'AVGO', company:'Broadcom Inc', price:207, fwdPE:23.2, revGrowth:29, epsGrowth:40,
+    target:280, analystTarget:270, rating:'Buy', conviction:8.8,
+    thesis:'Second biggest AI winner after NVIDIA. Custom XPUs for Google, Meta, Apple. $73B AI backlog over 18 months. 68% EBITDA margins. VMware acquisition driving software margin expansion.',
+    risks:'Customer concentration in top 3 hyperscalers, custom silicon competition',
+    tags:['AI Custom Silicon','Networking','Software'],
+    sector:'Semiconductors', link:null
+  },
+  {
+    ticker:'LULU', company:'Lululemon Athletica', price:157, fwdPE:13, revGrowth:8, epsGrowth:12,
+    target:220, analystTarget:190, rating:'Buy', conviction:8.5,
+    thesis:'Down 54% from highs — cheapest valuation in a decade at 12x trailing earnings. China growing 46% YoY. 55%+ gross margins. $1M insider purchase by board member. Classic contrarian deep value.',
+    risks:'U.S. same-store deceleration, tariff headwinds, brand fatigue concerns',
+    tags:['Contrarian','Deep Value','Consumer','China Growth'],
+    sector:'Consumer', link:null
+  },
+  {
+    ticker:'CEG', company:'Constellation Energy', price:303, fwdPE:27, revGrowth:11, epsGrowth:22.5,
+    target:410, analystTarget:380, rating:'Buy', conviction:8.3,
+    thesis:'Largest U.S. nuclear fleet. 20-year PPAs with Microsoft (TMI restart) and Meta (1.1 GW). Calpine acquisition gives 60 GW capacity. Down 27% from $412 high. Monopoly on AI power.',
+    risks:'Regulatory risk on nuclear restarts, Calpine integration, TMI restart capital costs ($1.6B)',
+    tags:['Nuclear','AI Power','Clean Energy','Data Centers'],
+    sector:'Energy', link:null
+  },
+  {
+    ticker:'LLY', company:'Eli Lilly', price:898, fwdPE:40, revGrowth:18.4, epsGrowth:30,
+    target:1200, analystTarget:1196, rating:'Buy', conviction:8.0,
+    thesis:'Co-leader of $100B GLP-1 obesity market. Tirzepatide growing 115% YoY. Oral formulation (orforglipron) filing in 2026 massively expands TAM. Medicare coverage starting mid-2026.',
+    risks:'Premium valuation, GLP-1 competition (Novo, Viking), manufacturing scale-up',
+    tags:['GLP-1','Obesity','Pharma','Secular Growth'],
+    sector:'Healthcare', link:null
+  },
+  {
+    ticker:'ANET', company:'Arista Networks', price:123, fwdPE:25, revGrowth:25, epsGrowth:28,
+    target:175, analystTarget:174, rating:'Buy', conviction:7.8,
+    thesis:'Dominant Ethernet networking for AI clusters. AI revenue guidance raised to $3.25B (+100% YoY). Zero debt. 40% operating margins. 53% upside to high analyst targets.',
+    risks:'NVIDIA InfiniBand competition, hyperscaler spending slowdown',
+    tags:['AI Networking','Data Centers','Ethernet'],
+    sector:'Semiconductors', link:null
+  },
+  {
+    ticker:'CCJ', company:'Cameco Corp', price:105, fwdPE:35, revGrowth:11, epsGrowth:243,
+    target:140, analystTarget:130, rating:'Buy', conviction:7.5,
+    thesis:'World\'s #2 uranium producer. Structural uranium supply deficit. 49% Westinghouse ownership = full nuclear fuel cycle exposure. Long-term uranium at 14-year high of $86.50/lb.',
+    risks:'Uranium price volatility, Kazakhstan production ramp, SMR regulatory delays',
+    tags:['Uranium','Nuclear','Commodity','Supply Deficit'],
+    sector:'Energy', link:null
+  },
+  {
+    ticker:'VRT', company:'Vertiv Holdings', price:276, fwdPE:42.5, revGrowth:30, epsGrowth:47,
+    target:340, analystTarget:279, rating:'Hold', conviction:6.8,
+    thesis:'Leading data center cooling and power systems provider. Liquid cooling mandatory as GPU power density surges. $15B backlog. 30%+ revenue growth with 47% earnings growth.',
+    risks:'Premium valuation at 42x, competition from Schneider/Eaton, capex slowdown risk',
+    tags:['Data Center Cooling','Power','AI Infrastructure'],
+    sector:'Industrials', link:null
+  },
+  {
+    ticker:'GD', company:'General Dynamics', price:365, fwdPE:21.2, revGrowth:3.7, epsGrowth:8,
+    target:420, analystTarget:396, rating:'Buy', conviction:7.2,
+    thesis:'$118B defense backlog — largest in history. One of two companies that can build nuclear submarines. $1.5T defense budget era. Gulfstream provides commercial diversification.',
+    risks:'Sequestration risk, supply chain labor shortages, Gulfstream cyclicality',
+    tags:['Defense','Submarines','Aerospace'],
+    sector:'Defense', link:null
+  },
+  {
+    ticker:'RTX', company:'RTX Corporation', price:192, fwdPE:29, revGrowth:12.1, epsGrowth:15,
+    target:235, analystTarget:225, rating:'Buy', conviction:7.0,
+    thesis:'Broadest defense portfolio: missiles (Patriot), engines (F-135), radar, cyber. Beat on revenue and EPS last quarter. Rising Middle East tensions and European rearmament driving demand.',
+    risks:'Pratt & Whitney engine recall costs, international sales regulatory hurdles',
+    tags:['Defense','Missiles','Engines','Radar'],
+    sector:'Defense', link:null
+  },
+  {
+    ticker:'CRWD', company:'CrowdStrike', price:393, fwdPE:75, revGrowth:22, epsGrowth:25,
+    target:510, analystTarget:507, rating:'Hold', conviction:6.5,
+    thesis:'Dominant cloud-native cybersecurity platform. $5.25B ARR growing 24%. Fully recovered from July 2024 outage. IBM partnership + Charlotte AI strengthen moat. Pulled back with market.',
+    risks:'Premium valuation, security spending rationalization, Microsoft competition',
+    tags:['Cybersecurity','AI Security','SaaS'],
+    sector:'Technology', link:null
+  },
+  {
+    ticker:'PWR', company:'Quanta Services', price:578, fwdPE:44, revGrowth:15, epsGrowth:18,
+    target:650, analystTarget:574, rating:'Hold', conviction:6.3,
+    thesis:'Largest electrical infrastructure contractor in North America. $44B backlog (+27.5%). Turnkey solutions for hyperscaler data center construction. Picks-and-shovels AI power play.',
+    risks:'Labor cost inflation, project execution risk, interest rate sensitivity',
+    tags:['Infrastructure','Data Centers','Grid','Construction'],
+    sector:'Industrials', link:null
   }
-};
+];
 
-function mergeOpts(custom) {
-  return JSON.parse(JSON.stringify({...defaultOpts, ...custom}));
+const shorts = [
+  {
+    ticker:'TSLA', company:'Tesla Inc', price:272, fwdPE:185, revGrowth:-2, epsGrowth:-10,
+    target:155, analystTarget:255, rating:'Short', conviction:8.1,
+    thesis:'185x forward P/E with declining EV sales and compressing margins. CEO distraction with government role. Robotaxi timeline repeatedly pushed. China competition intensifying from BYD.',
+    risks:'Cult stock, Elon optionality, FSD/robotaxi breakthrough, energy storage growth',
+    tags:['Overvalued','EV Decline','CEO Risk','Margin Compression'],
+    sector:'Automotive'
+  },
+  {
+    ticker:'PLTR', company:'Palantir Technologies', price:107, fwdPE:117, revGrowth:22, epsGrowth:20,
+    target:60, analystTarget:95, rating:'Short', conviction:7.4,
+    thesis:'117x forward P/E for 22% revenue growth — PEG of 5.3x. Valuation prices in perfection for a decade. Government contract concentration. Revenue growth decelerating. Stock up 300%+ on AI hype alone.',
+    risks:'AI narrative strength, government spending tailwinds, platform stickiness',
+    tags:['Overvalued','AI Hype','Gov Concentration'],
+    sector:'Technology'
+  },
+  {
+    ticker:'SNOW', company:'Snowflake', price:185, fwdPE:null, revGrowth:25, epsGrowth:null,
+    target:120, analystTarget:195, rating:'Short', conviction:6.8,
+    thesis:'Still unprofitable at ~$3.5B revenue. 25x EV/Revenue for decelerating growth. Net revenue retention declining. Competition from Databricks intensifying. CEO transition risk.',
+    risks:'Product quality, AI data workload growth, M&A target',
+    tags:['Unprofitable','Decelerating Growth','Competition'],
+    sector:'Technology'
+  },
+  {
+    ticker:'RIVN', company:'Rivian Automotive', price:14, fwdPE:null, revGrowth:15, epsGrowth:null,
+    target:7, analystTarget:16, rating:'Short', conviction:6.5,
+    thesis:'Burning cash at unsustainable rates. Negative gross margins. VW partnership provides lifeline but valuation still assumes profitability years away. Tariff exposure on components.',
+    risks:'VW partnership, R2 launch potential, EV policy tailwinds',
+    tags:['Cash Burn','Negative Margins','EV'],
+    sector:'Automotive'
+  },
+  {
+    ticker:'ABNB', company:'Airbnb', price:128, fwdPE:32, revGrowth:10, epsGrowth:8,
+    target:95, analystTarget:145, rating:'Watch', conviction:5.5,
+    thesis:'Growth decelerating to single digits while trading at 32x forward earnings. Regulatory headwinds mounting globally (NYC, Barcelona, EU). Supply growth outpacing demand growth. Margin pressure.',
+    risks:'Brand strength, new product categories (experiences, luxury), housing shortage tailwind',
+    tags:['Decelerating','Regulatory Risk','Valuation'],
+    sector:'Consumer'
+  }
+];
+
+// ── RENDER STOCK CARDS ──
+function renderCard(s, isShort) {
+  const upside = ((s.target - s.price) / s.price * 100);
+  const upsidePct = Math.min(Math.abs(upside), 100);
+  const pillClass = s.rating === 'Strong Buy' ? 'pill-strong-buy' : s.rating === 'Buy' ? 'pill-buy' : s.rating === 'Short' ? 'pill-sell' : s.rating === 'Hold' ? 'pill-hold' : 'pill-watch';
+  return `
+    <div class="stock-card ${isShort ? 'short-card' : ''}" onclick="${s.link ? `window.location='${s.link}'` : ''}">
+      ${s.link ? `<a href="${s.link}" class="dd-link has-link">View Full DD</a>` : ''}
+      <div class="card-header">
+        <span class="ticker">${s.ticker}</span>
+        <span class="rating-pill ${pillClass}">${s.rating}</span>
+      </div>
+      <div class="company">${s.company} &middot; ${s.sector}</div>
+      <div class="thesis">${s.thesis}</div>
+      <div class="metrics">
+        <div class="metric"><div class="m-label">Price</div><div class="m-val">$${s.price}</div></div>
+        <div class="metric"><div class="m-label">Fwd P/E</div><div class="m-val">${s.fwdPE ? s.fwdPE + 'x' : 'N/A'}</div></div>
+        <div class="metric"><div class="m-label">${isShort ? 'Downside' : 'Upside'}</div><div class="m-val ${isShort ? 'down' : 'up'}">${isShort ? '' : '+'}${upside.toFixed(0)}%</div></div>
+      </div>
+      <div class="tags">${s.tags.map(t => `<span class="tag">${t}</span>`).join('')}</div>
+      <div class="upside-bar" style="width:${upsidePct}%"></div>
+    </div>`;
 }
 
-// Revenue Chart
-new Chart(document.getElementById('revenueChart'), {
-  type: 'bar',
-  data: {
-    labels: ['FQ2\'25', 'FQ3\'25', 'FQ4\'25', 'FQ1\'26', 'FQ2\'26', 'FQ3\'26 (G)'],
-    datasets: [{
-      label: 'Revenue ($B)',
-      data: [8.05, 9.30, 11.32, 13.64, 23.86, 33.50],
-      backgroundColor: [colors.blue, colors.blue, colors.blue, colors.blue, colors.accent, colors.green],
-      borderRadius: 6
-    }]
-  },
-  options: mergeOpts({
-    plugins: { legend: { display: false } },
-    scales: { y: { ticks: { color: colors.muted, callback: v => '$'+v+'B' }, grid: { color: colors.grid } }, x: { ticks: { color: colors.muted }, grid: { color: colors.grid } } }
-  })
+document.getElementById('longGrid').innerHTML = longs.map(s => renderCard(s, false)).join('');
+document.getElementById('shortGrid').innerHTML = shorts.map(s => renderCard(s, true)).join('');
+
+// ── WATCHLIST TABLE ──
+const allStocks = [...longs.map(s => ({...s, side:'Long'})), ...shorts.map(s => ({...s, side:'Short'}))];
+function renderWatchlist(data) {
+  document.getElementById('watchlistBody').innerHTML = data.map(s => {
+    const upside = ((s.target - s.price) / s.price * 100);
+    const cls = upside > 0 ? 'up' : 'down';
+    return `<tr>
+      <td style="color:var(--accent)">${s.ticker}</td>
+      <td>${s.company}</td>
+      <td class="num">$${s.price}</td>
+      <td class="num">${s.fwdPE ? s.fwdPE + 'x' : '—'}</td>
+      <td class="num ${s.revGrowth > 0 ? 'up' : 'down'}">${s.revGrowth > 0 ? '+' : ''}${s.revGrowth}%</td>
+      <td class="num">$${s.target}</td>
+      <td class="num ${cls}">${upside > 0 ? '+' : ''}${upside.toFixed(1)}%</td>
+      <td><span class="rating-pill ${s.rating === 'Strong Buy' || s.rating === 'Buy' ? 'pill-buy' : s.rating === 'Short' ? 'pill-sell' : 'pill-hold'}" style="font-size:11px;padding:2px 8px">${s.rating}</span></td>
+      <td>${s.side}</td>
+      <td>${s.link ? `<a href="${s.link}" style="color:var(--accent);text-decoration:none;font-weight:600">View</a>` : '—'}</td>
+    </tr>`;
+  }).join('');
+}
+renderWatchlist(allStocks);
+
+// Sort
+let sortDir = {};
+document.querySelectorAll('.sort-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const col = +btn.dataset.col;
+    sortDir[col] = !sortDir[col];
+    const sorted = [...allStocks].sort((a, b) => {
+      const keys = ['ticker','company','price','fwdPE','revGrowth','target','upside','rating','side'];
+      let va = [a.ticker,a.company,a.price,a.fwdPE||0,a.revGrowth,a.target,((a.target-a.price)/a.price),a.rating,a.side][col];
+      let vb = [b.ticker,b.company,b.price,b.fwdPE||0,b.revGrowth,b.target,((b.target-b.price)/b.price),b.rating,b.side][col];
+      if (typeof va === 'string') return sortDir[col] ? va.localeCompare(vb) : vb.localeCompare(va);
+      return sortDir[col] ? va - vb : vb - va;
+    });
+    renderWatchlist(sorted);
+  });
 });
 
-// Margin Chart
-new Chart(document.getElementById('marginChart'), {
-  type: 'line',
-  data: {
-    labels: ['FQ2\'25', 'FQ3\'25', 'FQ4\'25', 'FQ1\'26', 'FQ2\'26', 'FQ3\'26 (G)'],
-    datasets: [{
-      label: 'Gross Margin %',
-      data: [37.9, 39.0, 45.7, 56.0, 74.9, 81.0],
-      borderColor: colors.green,
-      backgroundColor: 'rgba(34,197,94,.1)',
-      fill: true,
-      tension: .4,
-      pointRadius: 5,
-      pointBackgroundColor: colors.green
-    }, {
-      label: '5Y Avg Gross Margin',
-      data: [30, 30, 30, 30, 30, 30],
-      borderColor: colors.red,
-      borderDash: [5,5],
-      pointRadius: 0
-    }]
-  },
-  options: mergeOpts({ scales: { y: { ticks: { color: colors.muted, callback: v => v+'%' }, grid: { color: colors.grid }, min: 20 }, x: { ticks: { color: colors.muted }, grid: { color: colors.grid } } } })
-});
+// ── CHARTS ──
+const dOpts = {
+  responsive:true, maintainAspectRatio:false,
+  plugins:{legend:{labels:{color:C.text,font:{size:11}}},tooltip:{backgroundColor:'#161820',borderColor:'#23263a',borderWidth:1,titleColor:C.text,bodyColor:C.muted,padding:12,cornerRadius:8}},
+  scales:{x:{ticks:{color:C.muted},grid:{color:C.grid}},y:{ticks:{color:C.muted},grid:{color:C.grid}}}
+};
 
-// EPS Chart
-new Chart(document.getElementById('epsChart'), {
-  type: 'bar',
-  data: {
-    labels: ['FQ2\'25', 'FQ3\'25', 'FQ4\'25', 'FQ1\'26', 'FQ2\'26', 'FQ3\'26 (G)'],
-    datasets: [{
-      label: 'GAAP EPS',
-      data: [1.56, 1.91, 3.03, 4.78, 12.07, 18.90],
-      backgroundColor: (ctx) => ctx.dataIndex === 5 ? colors.green : colors.purple,
-      borderRadius: 6
-    }]
+// PE vs Growth scatter
+new Chart(document.getElementById('peGrowthChart'), {
+  type:'bubble',
+  data:{
+    datasets: longs.filter(s=>s.fwdPE).map(s => ({
+      label: s.ticker,
+      data:[{x:s.fwdPE, y:s.revGrowth, r: Math.max(s.conviction * 2, 6)}],
+      backgroundColor: s.conviction >= 8 ? C.green+'99' : s.conviction >= 7 ? C.cyan+'99' : C.muted+'99',
+      borderColor: s.conviction >= 8 ? C.green : s.conviction >= 7 ? C.cyan : C.muted
+    }))
   },
-  options: mergeOpts({ plugins: { legend: { display: false } }, scales: { y: { ticks: { color: colors.muted, callback: v => '$'+v }, grid: { color: colors.grid } }, x: { ticks: { color: colors.muted }, grid: { color: colors.grid } } } })
-});
-
-// Valuation Chart
-new Chart(document.getElementById('valuationChart'), {
-  type: 'bar',
-  data: {
-    labels: ['TTM P/E', 'Fwd P/E', 'P/B', 'EV/EBITDA', 'Fwd EV/EBITDA'],
-    datasets: [{
-      label: 'Current',
-      data: [18.6, 4.4, 6.04, 11.96, 6.9],
-      backgroundColor: colors.accent,
-      borderRadius: 6
-    }, {
-      label: 'Historical Avg',
-      data: [17.9, 15, 2.47, 12, 10],
-      backgroundColor: colors.muted,
-      borderRadius: 6
-    }]
-  },
-  options: mergeOpts({ scales: { y: { ticks: { color: colors.muted, callback: v => v+'x' }, grid: { color: colors.grid } }, x: { ticks: { color: colors.muted }, grid: { color: colors.grid } } } })
-});
-
-// Segment Chart
-new Chart(document.getElementById('segmentChart'), {
-  type: 'doughnut',
-  data: {
-    labels: ['CMBU (Cloud)', 'MCBU (Mobile/Client)', 'CDBU (Data Centre)', 'AEBU (Auto/Embedded)'],
-    datasets: [{
-      data: [7.75, 7.71, 5.69, 2.71],
-      backgroundColor: [colors.blue, colors.purple, colors.cyan, colors.orange],
-      borderWidth: 0
-    }]
-  },
-  options: {
-    responsive: true, maintainAspectRatio: false,
-    plugins: {
-      legend: { position: 'right', labels: { color: colors.text, font: { size: 12 }, padding: 16 } },
-      tooltip: { callbacks: { label: ctx => ctx.label + ': $' + ctx.parsed + 'B' } }
-    }
-  }
-});
-
-// Product Mix
-new Chart(document.getElementById('productMixChart'), {
-  type: 'doughnut',
-  data: {
-    labels: ['DRAM', 'NAND'],
-    datasets: [{
-      data: [18.8, 5.06],
-      backgroundColor: [colors.accent, colors.orange],
-      borderWidth: 0
-    }]
-  },
-  options: {
-    responsive: true, maintainAspectRatio: false,
-    plugins: {
-      legend: { position: 'right', labels: { color: colors.text, font: { size: 14 }, padding: 20 } },
-      tooltip: { callbacks: { label: ctx => ctx.label + ': $' + ctx.parsed + 'B (' + (ctx.parsed/23.86*100).toFixed(0) + '%)' } }
-    }
-  }
-});
-
-// HBM TAM Chart
-new Chart(document.getElementById('hbmTamChart'), {
-  type: 'bar',
-  data: {
-    labels: ['2024', '2025', '2026E', '2027E', '2028E', '2033E'],
-    datasets: [{
-      label: 'HBM TAM ($B)',
-      data: [16, 35, 56, 75, 100, 130],
-      backgroundColor: [colors.muted, colors.blue, colors.accent, colors.accent, colors.purple, colors.purple],
-      borderRadius: 6
-    }]
-  },
-  options: mergeOpts({ plugins: { legend: { display: false } }, scales: { y: { ticks: { color: colors.muted, callback: v => '$'+v+'B' }, grid: { color: colors.grid } }, x: { ticks: { color: colors.muted }, grid: { color: colors.grid } } } })
-});
-
-// HBM Market Share
-new Chart(document.getElementById('hbmShareChart'), {
-  type: 'pie',
-  data: {
-    labels: ['SK Hynix (62%)', 'Micron (21%)', 'Samsung (17%)'],
-    datasets: [{
-      data: [62, 21, 17],
-      backgroundColor: [colors.red, colors.green, colors.blue],
-      borderWidth: 0
-    }]
-  },
-  options: {
-    responsive: true, maintainAspectRatio: false,
-    plugins: { legend: { position: 'right', labels: { color: colors.text, font: { size: 13 }, padding: 16 } } }
-  }
-});
-
-// Hyperscaler Capex
-new Chart(document.getElementById('capexChart'), {
-  type: 'bar',
-  data: {
-    labels: ['Amazon', 'Alphabet', 'Microsoft', 'Meta', 'Oracle'],
-    datasets: [{
-      label: '2026 CapEx ($B)',
-      data: [200, 180, 120, 125, 50],
-      backgroundColor: [colors.orange, colors.blue, colors.cyan, colors.purple, colors.red],
-      borderRadius: 6
-    }]
-  },
-  options: mergeOpts({ indexAxis: 'y', plugins: { legend: { display: false } }, scales: { x: { ticks: { color: colors.muted, callback: v => '$'+v+'B' }, grid: { color: colors.grid } }, y: { ticks: { color: colors.muted, font: { size: 13 } }, grid: { color: colors.grid } } } })
-});
-
-// Cycle Analysis Chart
-new Chart(document.getElementById('cycleChart'), {
-  type: 'line',
-  data: {
-    labels: ['2014', '2015', '2016', '2017', '2018', '2019', '2020', '2021', '2022', '2023', '2024', '2025', '2026'],
-    datasets: [{
-      label: 'DRAM Sector EV/Sales',
-      data: [3.2, 1.8, 1.2, 2.0, 3.1, 0.9, 1.5, 3.0, 1.2, 0.7, 1.8, 2.8, 3.18],
-      borderColor: colors.blue,
-      backgroundColor: 'rgba(59,130,246,.1)',
-      fill: true,
-      tension: .3,
-      pointRadius: 4
-    }, {
-      label: 'MU EV/Sales (TTM)',
-      data: [2.8, 1.5, 1.0, 2.5, 3.5, 0.7, 1.2, 3.2, 1.0, 0.5, 2.0, 4.5, 8.11],
-      borderColor: colors.accent,
-      tension: .3,
-      pointRadius: 4
-    }, {
-      label: 'Historical Peak (~3.2x)',
-      data: [3.2,3.2,3.2,3.2,3.2,3.2,3.2,3.2,3.2,3.2,3.2,3.2,3.2],
-      borderColor: colors.red,
-      borderDash: [8,4],
-      pointRadius: 0
-    }]
-  },
-  options: mergeOpts({ scales: { y: { ticks: { color: colors.muted, callback: v => v+'x' }, grid: { color: colors.grid } }, x: { ticks: { color: colors.muted }, grid: { color: colors.grid } } } })
-});
-
-// Analyst Ratings
-new Chart(document.getElementById('analystChart'), {
-  type: 'bar',
-  data: {
-    labels: ['Strong Buy', 'Buy', 'Hold', 'Sell', 'Strong Sell'],
-    datasets: [{
-      label: 'Analysts',
-      data: [18, 10, 2, 0, 0],
-      backgroundColor: [colors.green, 'rgba(34,197,94,.6)', colors.orange, colors.red, 'rgba(239,68,68,.6)'],
-      borderRadius: 6
-    }]
-  },
-  options: mergeOpts({ plugins: { legend: { display: false } }, scales: { y: { ticks: { color: colors.muted, stepSize: 5 }, grid: { color: colors.grid } }, x: { ticks: { color: colors.muted }, grid: { color: colors.grid } } } })
-});
-
-// Risk Chart
-new Chart(document.getElementById('riskChart'), {
-  type: 'radar',
-  data: {
-    labels: ['Cyclicality', 'Valuation\n(TTM metrics)', 'Competition', 'Tariff/Geo\nRisk', 'Customer\nConcentration', 'Tech\nDisruption', 'Execution\nRisk', 'Demand\nSustainability'],
-    datasets: [{
-      label: 'Risk Level (10 = highest)',
-      data: [8, 6, 5, 6, 5, 3, 3, 2],
-      backgroundColor: 'rgba(239,68,68,.15)',
-      borderColor: colors.red,
-      pointBackgroundColor: colors.red
-    }, {
-      label: 'Opportunity (10 = highest)',
-      data: [3, 9, 6, 4, 5, 7, 8, 9],
-      backgroundColor: 'rgba(34,197,94,.15)',
-      borderColor: colors.green,
-      pointBackgroundColor: colors.green
-    }]
-  },
-  options: {
-    responsive: true, maintainAspectRatio: false,
-    scales: {
-      r: {
-        beginAtZero: true, max: 10,
-        grid: { color: colors.grid },
-        angleLines: { color: colors.grid },
-        pointLabels: { color: colors.text, font: { size: 11 } },
-        ticks: { color: colors.muted, backdropColor: 'transparent', stepSize: 2 }
-      }
+  options:{
+    ...dOpts,
+    scales:{
+      x:{title:{display:true,text:'Forward P/E',color:C.muted},ticks:{color:C.muted,callback:v=>v+'x'},grid:{color:C.grid}},
+      y:{title:{display:true,text:'Revenue Growth %',color:C.muted},ticks:{color:C.muted,callback:v=>v+'%'},grid:{color:C.grid}}
     },
-    plugins: { legend: { labels: { color: colors.text } } }
+    plugins:{...dOpts.plugins,legend:{display:false},tooltip:{...dOpts.plugins.tooltip,callbacks:{label:ctx=>`${ctx.dataset.label}: ${ctx.parsed.x}x P/E, ${ctx.parsed.y}% growth`}}}
   }
+});
+
+// Upside chart
+new Chart(document.getElementById('upsideChart'), {
+  type:'bar',
+  data:{
+    labels: longs.map(s=>s.ticker),
+    datasets:[{
+      label:'Our Target Upside %',
+      data:longs.map(s=>((s.target-s.price)/s.price*100).toFixed(1)),
+      backgroundColor:longs.map(s=>s.conviction>=8?C.green:s.conviction>=7?C.cyan:C.muted),
+      borderRadius:6
+    }]
+  },
+  options:{...dOpts,indexAxis:'y',plugins:{...dOpts.plugins,legend:{display:false}},scales:{x:{ticks:{color:C.muted,callback:v=>v+'%'},grid:{color:C.grid}},y:{ticks:{color:C.muted,font:{size:12,weight:'bold'}},grid:{color:C.grid}}}}
+});
+
+// Conviction vs Risk
+new Chart(document.getElementById('convictionChart'), {
+  type:'scatter',
+  data:{
+    datasets:[
+      ...longs.map(s=>({label:s.ticker,data:[{x:s.conviction,y:s.fwdPE||0}],pointRadius:8,pointBackgroundColor:C.green+'cc',pointBorderColor:C.green})),
+      ...shorts.filter(s=>s.fwdPE).map(s=>({label:s.ticker,data:[{x:s.conviction,y:s.fwdPE}],pointRadius:8,pointBackgroundColor:C.red+'cc',pointBorderColor:C.red}))
+    ]
+  },
+  options:{
+    ...dOpts,
+    scales:{
+      x:{title:{display:true,text:'Conviction Score',color:C.muted},min:5,max:10,ticks:{color:C.muted},grid:{color:C.grid}},
+      y:{title:{display:true,text:'Forward P/E',color:C.muted},ticks:{color:C.muted,callback:v=>v+'x'},grid:{color:C.grid}}
+    },
+    plugins:{...dOpts.plugins,legend:{display:false},tooltip:{...dOpts.plugins.tooltip,callbacks:{label:ctx=>`${ctx.dataset.label}: Conviction ${ctx.parsed.x}, ${ctx.parsed.y}x P/E`}}}
+  }
+});
+
+// Sector allocation
+const sectorCounts = {};
+longs.forEach(s => { sectorCounts[s.sector] = (sectorCounts[s.sector]||0)+1; });
+new Chart(document.getElementById('sectorChart'), {
+  type:'doughnut',
+  data:{
+    labels:Object.keys(sectorCounts),
+    datasets:[{data:Object.values(sectorCounts),backgroundColor:[C.accent,C.green,C.orange,C.cyan,C.purple,C.pink,C.blue],borderWidth:0}]
+  },
+  options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{color:C.text,font:{size:12},padding:14}}}}
+});
+
+// Smooth scroll for nav
+document.querySelectorAll('nav a[href^="#"]').forEach(a => {
+  a.addEventListener('click', e => {
+    e.preventDefault();
+    const target = document.querySelector(a.getAttribute('href'));
+    if(target) target.scrollIntoView({behavior:'smooth',block:'start'});
+    document.querySelectorAll('nav a').forEach(l=>l.classList.remove('active'));
+    a.classList.add('active');
+  });
 });
 </script>
 </body>
